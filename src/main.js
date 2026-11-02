@@ -2,6 +2,7 @@ import './style.css';
 import { MAINNET_CONTRACT, TESTNET_PROGRESS, LINKS } from './config.js';
 import { mountLessons } from './lessonApp.js';
 import { io, sweepify } from './reveal.js';
+import { initWalletUI, initScan, initWall, initGraduates } from './live.js';
 
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -166,7 +167,7 @@ $$('.tile').forEach((t) => { io.observe(t); t.addEventListener('click', () => t.
 /* ---------- Live demo stream (example hellos until the contract is live) ---------- */
 (() => {
   const list = $('#demoList');
-  if (!list) return;
+  if (!list || TESTNET_PROGRESS) return;
   const EX = ['Ada', 'Lin', 'Sam', 'Noor', 'Eko', 'Mina', 'Theo', 'Zara'];
   let n = 0;
   const add = () => {
@@ -209,19 +210,11 @@ $$('#helperQ button').forEach((b) => b.addEventListener('click', () => {
   ha.textContent = HELP[+b.dataset.i][1]; ha.hidden = false;
 }));
 
-/* ---------- Wallet check (needs the Progress contract) ---------- */
-const form = $('#walletForm'), res = $('#walletResult');
-$('#walletInput').addEventListener('input', (e) => form.classList.toggle('filled', e.target.value.length > 0));
-form.addEventListener('submit', (e) => {
-  e.preventDefault();
-  const v = $('#walletInput').value.trim();
-  res.className = 'search-note';
-  if (!/^0x[0-9a-fA-F]{40}$/.test(v)) { res.classList.add('err'); res.textContent = 'That doesn\'t look like a wallet address. It starts with 0x and has 40 more characters.'; return; }
-  if (!TESTNET_PROGRESS) { res.textContent = 'The Progress contract isn\'t deployed yet, so there\'s nothing to check. Check back soon.'; return; }
-});
-$('#connect').addEventListener('click', () => {
-  res.className = 'search-note'; res.textContent = 'Wallet connect arrives with the lessons.';
-});
+/* ---------- Wallet, wallet check, wall and graduates (live.js) ---------- */
+initWalletUI();
+initScan();
+initWall();
+initGraduates();
 
 /* ---------- Footer config ---------- */
 if (MAINNET_CONTRACT) {

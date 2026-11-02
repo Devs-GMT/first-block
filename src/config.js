@@ -1,6 +1,8 @@
 // Single place for deployed addresses. Leave null until deployed; the UI shows an honest "not deployed yet" state.
 export const MAINNET_CONTRACT = null;
 export const TESTNET_PROGRESS = null;
+// First block to scan for Hello events; set it to the Progress deployment block.
+export const TESTNET_START_BLOCK = 0;
 
 export const LINKS = {
   botchain: 'https://botchain.ai',

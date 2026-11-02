@@ -82,7 +82,7 @@
       <li><a class="nav-btn" href="#faq">FAQ</a></li>
     </ul>
     <div class="nav-right">
-      <button class="pill pill-soft nav-wallet" id="connect">Connect wallet</button>
+      <div class="wdd" id="walletDd"><button class="pill pill-soft nav-wallet" id="connect"><i class="net-dot"></i><span id="connectLabel">Connect wallet</span></button><div class="menu menu-right" role="menu" id="walletMenu"></div></div>
       <a class="pill pill-dark sm" href="#lessons">Start lesson 1</a>
       <button class="burger" id="burger" aria-label="Menu" aria-expanded="false"><svg class="ic"><use href="#i-menu"/></svg></button>
     </div>
@@ -92,7 +92,7 @@
     <a href="#lessons">1 · Get set up</a><a href="#lessons">2 · First transaction</a><a href="#lessons">3 · Talk to a contract</a><a href="#lessons">4 · Deploy your own</a><a href="#lessons">5 · Make it work</a><a href="#lessons">Graduate</a>
     <p class="sheet-h">Resources</p>
     <a href="https://dev-docs.botchain.ai/docs/intro" target="_blank" rel="noopener">BOT Chain docs</a><a href="https://faucet.botchain.ai/basic" target="_blank" rel="noopener">Faucet</a><a href="https://scan.bohr.life" target="_blank" rel="noopener">Testnet explorer</a>
-    <a class="sheet-row" href="#who">Who it's for</a><a class="sheet-row" href="#graduates">Graduates</a><a class="sheet-row" href="#faq">FAQ</a>
+    <button class="sheet-row sheet-wallet" id="connectM">Connect wallet</button><a class="sheet-row" href="#who">Who it's for</a><a class="sheet-row" href="#graduates">Graduates</a><a class="sheet-row" href="#faq">FAQ</a>
   </div>
 </header>
 
@@ -111,6 +111,7 @@
       <button class="pill pill-soft" type="submit">Check<span class="hide-sm">&nbsp;progress</span></button>
       <span class="cursor" aria-hidden="true"><svg viewBox="0 0 20 20"><path d="M3 2l13 6-5.5 2L8.5 16 3 2z"/></svg><b>Paste your wallet</b></span>
     </form>
+    <div class="scan" id="scan" hidden aria-live="polite"></div>
     <span class="net-chip fade fade-copy"><svg class="ic xs"><use href="#i-network"/></svg>Practising on <b>BOT Chain Testnet</b></span>
     <p class="search-note" id="walletResult" role="status">Free on testnet · no signup</p>
     <a class="link-under" href="#lessons">Or start from lesson 1</a>
