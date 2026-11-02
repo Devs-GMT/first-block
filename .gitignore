@@ -3,3 +3,6 @@ dist
 .env
 contracts/.env
 .local/
+contracts/node_modules
+contracts/cache
+contracts/artifacts
