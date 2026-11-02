@@ -98,7 +98,7 @@ export function initScan() {
     if (failed) foot.innerHTML = '<button class="link-under" data-retry>Retry the failed reads</button>';
     else if (res.done && res.done.count === 5) foot.textContent = 'All five lessons passed. This wallet can graduate on mainnet.';
     else if (!res.done) foot.textContent = 'Lesson progress is read from the Progress contract, which isn\'t deployed yet.';
-    else foot.innerHTML = `<a class="link-under" href="#lessons">Continue with lesson ${Math.min(res.done.count + 1, 5)}</a>`;
+    else foot.innerHTML = `<a class="link-under" href="/lesson/${Math.min(res.done.count + 1, 5)}">Continue with lesson ${Math.min(res.done.count + 1, 5)}</a>`;
     $('[data-retry]', panel)?.addEventListener('click', () => check(addr));
   };
 

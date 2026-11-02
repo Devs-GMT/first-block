@@ -17,19 +17,32 @@ export const PROGRESS_ABI = [
   'function counterOf(address) view returns (address)',
   'event LessonDone(address indexed learner, uint8 lesson)',
   'event Hello(address indexed learner, string name)',
+  'error NotDone(uint8 lesson)',
+  'error NoGas()',
+  'error TipTooSmall()',
+  'error BadName()',
+  'error NotACounter()',
+  'error NotYourCounter()',
+  'error CountTooLow(uint256 count)',
 ];
 export const GRADUATION_ABI = [
   'function graduate(string note)',
   'function total() view returns (uint256)',
   'function isGraduate(address) view returns (bool)',
   'function getGrads(uint256 from, uint256 count) view returns (tuple(address wallet, string note, uint64 at)[])',
+  'function gradId(address) view returns (uint256)',
+  'function grads(uint256) view returns (address wallet, string note, uint64 at)',
   'event Graduated(uint256 indexed id, address indexed wallet)',
+  'error AlreadyGraduated()',
+  'error NoteTooLong()',
 ];
 
 const reads = {
   testnet: new JsonRpcProvider(NETWORKS.testnet.rpc, NETWORKS.testnet.id, { staticNetwork: true }),
   mainnet: new JsonRpcProvider(NETWORKS.mainnet.rpc, NETWORKS.mainnet.id, { staticNetwork: true }),
 };
+
+export const provider = (which) => reads[which];
 
 /** Public RPCs reset connections now and then, so reads retry before giving up. */
 export async function withRetry(fn, tries = 3) {
@@ -39,6 +52,8 @@ export async function withRetry(fn, tries = 3) {
   }
   throw err;
 }
+
+export const COUNTER_ABI = ['function owner() view returns (address)', 'function count() view returns (uint256)', 'function increment()', 'event Incremented(address indexed by, uint256 newCount)'];
 
 export const progressRead = () => (TESTNET_PROGRESS ? new Contract(TESTNET_PROGRESS, PROGRESS_ABI, reads.testnet) : null);
 export const graduationRead = () => (MAINNET_CONTRACT ? new Contract(MAINNET_CONTRACT, GRADUATION_ABI, reads.mainnet) : null);

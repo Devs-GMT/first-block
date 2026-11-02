@@ -51,12 +51,12 @@
       <li class="dd">
         <button class="nav-btn" aria-expanded="false">Lessons <svg class="ic sm"><use href="#i-chev"/></svg></button>
         <div class="menu" role="menu">
-          <a role="menuitem" href="#lessons" data-tab="0">1 · Get set up</a>
-          <a role="menuitem" href="#lessons" data-tab="1">2 · First transaction</a>
-          <a role="menuitem" href="#lessons" data-tab="2">3 · Talk to a contract</a>
-          <a role="menuitem" href="#lessons" data-tab="3">4 · Deploy your own</a>
-          <a role="menuitem" href="#lessons" data-tab="4">5 · Make it work</a>
-          <a role="menuitem" href="#lessons" data-tab="5">Graduate on mainnet</a>
+          <a role="menuitem" href="/lesson/1">1 · Get set up</a>
+          <a role="menuitem" href="/lesson/2">2 · First transaction</a>
+          <a role="menuitem" href="/lesson/3">3 · Talk to a contract</a>
+          <a role="menuitem" href="/lesson/4">4 · Deploy your own</a>
+          <a role="menuitem" href="/lesson/5">5 · Make it work</a>
+          <a role="menuitem" href="/graduate">Graduate on mainnet</a>
         </div>
       </li>
       <li class="dd">
@@ -78,25 +78,25 @@
           <a role="menuitem" href="https://github.com/Devs-GMT/BOTGuide" target="_blank" rel="noopener">BOTGuide</a>
         </div>
       </li>
-      <li><a class="nav-btn" href="#graduates">Graduates</a></li>
+      <li><a class="nav-btn" href="/wall">Graduates</a></li>
       <li><a class="nav-btn" href="#faq">FAQ</a></li>
     </ul>
     <div class="nav-right">
-      <div class="wdd" id="walletDd"><button class="pill pill-soft nav-wallet" id="connect"><i class="net-dot"></i><span id="connectLabel">Connect wallet</span></button><div class="menu menu-right" role="menu" id="walletMenu"></div></div>
-      <a class="pill pill-dark sm" href="#lessons">Start lesson 1</a>
+      <div class="wdd" id="walletDd"><button class="pill pill-soft nav-wallet" id="connect"><img class="wallet-logo" src="/logo-wallet-96.png" alt="" width="16" height="16" /><i class="net-dot"></i><span id="connectLabel">Connect wallet</span></button><div class="menu menu-right" role="menu" id="walletMenu"></div></div>
+      <a class="pill pill-dark sm" href="/lesson/1">Start lesson 1</a>
       <button class="burger" id="burger" aria-label="Menu" aria-expanded="false"><svg class="ic"><use href="#i-menu"/></svg></button>
     </div>
   </nav>
   <div class="sheet" id="sheet">
     <p class="sheet-h">Lessons</p>
-    <a href="#lessons">1 · Get set up</a><a href="#lessons">2 · First transaction</a><a href="#lessons">3 · Talk to a contract</a><a href="#lessons">4 · Deploy your own</a><a href="#lessons">5 · Make it work</a><a href="#lessons">Graduate</a>
+    <a href="/lesson/1">1 · Get set up</a><a href="/lesson/2">2 · First transaction</a><a href="/lesson/3">3 · Talk to a contract</a><a href="/lesson/4">4 · Deploy your own</a><a href="/lesson/5">5 · Make it work</a><a href="/graduate">Graduate</a>
     <p class="sheet-h">Resources</p>
     <a href="https://dev-docs.botchain.ai/docs/intro" target="_blank" rel="noopener">BOT Chain docs</a><a href="https://faucet.botchain.ai/basic" target="_blank" rel="noopener">Faucet</a><a href="https://scan.bohr.life" target="_blank" rel="noopener">Testnet explorer</a>
-    <button class="sheet-row sheet-wallet" id="connectM">Connect wallet</button><a class="sheet-row" href="#who">Who it's for</a><a class="sheet-row" href="#graduates">Graduates</a><a class="sheet-row" href="#faq">FAQ</a>
+    <button class="sheet-row sheet-wallet" id="connectM">Connect wallet</button><a class="sheet-row" href="#who">Who it's for</a><a class="sheet-row" href="/wall">Graduates</a><a class="sheet-row" href="#faq">FAQ</a>
   </div>
 </header>
 
-<main>
+<main id="home">
 <!-- 1 · Hero -->
 <section class="hero" id="top">
   <div class="hero-screen">
@@ -108,13 +108,13 @@
     <form class="search fade fade-copy" id="walletForm" autocomplete="off">
       <svg class="ic"><use href="#i-search"/></svg>
       <input id="walletInput" type="text" inputmode="text" spellcheck="false" placeholder="Paste a wallet address" aria-label="Wallet address" />
-      <button class="pill pill-soft" type="submit">Check<span class="hide-sm">&nbsp;progress</span></button>
+      <button class="pill pill-soft" type="submit"><span>Check<span class="hide-sm"> progress</span></span></button>
       <span class="cursor" aria-hidden="true"><svg viewBox="0 0 20 20"><path d="M3 2l13 6-5.5 2L8.5 16 3 2z"/></svg><b>Paste your wallet</b></span>
     </form>
     <div class="scan" id="scan" hidden aria-live="polite"></div>
     <span class="net-chip fade fade-copy"><svg class="ic xs"><use href="#i-network"/></svg>Practising on <b>BOT Chain Testnet</b></span>
     <p class="search-note" id="walletResult" role="status">Free on testnet · no signup</p>
-    <a class="link-under" href="#lessons">Or start from lesson 1</a>
+    <a class="link-under" href="/lesson/1">Or start from lesson 1</a>
   </div>
   </div>
 
@@ -177,7 +177,7 @@
       <div class="note-card reveal" id="noteCard">
         <p class="eyebrow">From the graduates</p>
         <p class="note-empty">Graduate notes will show up here, read straight from the mainnet contract. Be the first to leave one.</p>
-        <a class="link-under" href="#lessons">Start lesson 1</a>
+        <a class="link-under" href="/lesson/1">Start lesson 1</a>
       </div>
     </div>
     <ol class="problems">
@@ -314,7 +314,7 @@
       <p class="eyebrow live"><i class="live-dot"></i>Live demo</p>
       <h2 class="title" data-sweep>Don't take our word for it. Say hello to the chain.</h2>
       <p class="muted reveal">Lesson 3 writes your hello to a public wall. Everyone's hellos show up here, read straight from contract events.</p>
-      <div class="btn-row reveal"><a class="pill pill-dark" href="#lessons">Try it live</a><a class="pill pill-soft" href="#lessons">See the lessons</a></div>
+      <div class="btn-row reveal"><a class="pill pill-dark" href="/lesson/1">Try it live</a><a class="pill pill-soft" href="#lessons">See the lessons</a></div>
     </div>
     <div class="wall reveal" id="wall">
       <div class="wall-head"><span>Hello wall</span><span class="chip live-chip"><i class="live-dot"></i><span id="wallState">Example</span></span></div>
@@ -340,7 +340,7 @@
       <p class="eyebrow reveal">Graduates</p>
       <h2 class="title" data-sweep id="gradTitle">Be the first builder to take their first block.</h2>
       <p class="muted reveal">Every graduate is one transaction on BOT Chain mainnet, with a note they chose to leave.</p>
-      <a class="pill pill-soft reveal" href="#graduates">See the wall</a>
+      <a class="pill pill-soft reveal" href="/wall">See the wall</a>
     </div>
     <div class="grads" id="grads">
       <div class="grad-empty reveal"><svg class="ic lg"><use href="#i-cap"/></svg><p>No graduates yet.</p><p class="muted sm">Graduating is one transaction on BOT Chain mainnet after you pass all five lessons.</p></div>
@@ -355,12 +355,14 @@
     <div class="faq-left">
       <h2 class="title" data-sweep>Your questions, covered</h2>
       <p class="muted reveal">Ready when you are.</p>
-      <a class="pill pill-dark reveal" href="#lessons">Start lesson 1</a>
+      <a class="pill pill-dark reveal" href="/lesson/1">Start lesson 1</a>
     </div>
     <div class="faq" id="faqList"></div>
   </div>
 </section>
 
+</main>
+<main id="view" hidden></main>
 <!-- Footer block -->
 <footer class="foot">
   <div class="wrap">
@@ -370,14 +372,14 @@
       <p class="eyebrow">Lesson ∞</p>
       <h2 class="foot-h">Keep building on BOT Chain</h2>
       <div class="foot-row">
-        <a class="foot-chain" href="https://botchain.ai" target="_blank" rel="noopener"><img class="foot-logo" src="/brand/botchain-white.svg" alt="BOT Chain" height="22" /></a>
+        <a class="foot-chain" href="https://botchain.ai" target="_blank" rel="noopener"><img class="foot-logo" src="/logo-white-botchain.svg" alt="BOT Chain" height="22" /></a>
         <button class="mono-copy" id="copyAddr" aria-label="Copy contract address"><span id="addrText">chain ID 677 · not deployed yet</span></button>
         <a class="pill pill-dark" id="explorerBtn" href="https://scan.botchain.ai" target="_blank" rel="noopener">View on explorer <svg class="ic xs"><use href="#i-arrow"/></svg></a>
         <span class="chip" id="gradPill">0 graduates</span>
       </div>
     </div>
     <div class="foot-cols">
-      <div><p class="mono-label">Lessons</p><a href="#lessons">1 Get set up</a><a href="#lessons">2 First transaction</a><a href="#lessons">3 Talk to a contract</a><a href="#lessons">4 Deploy</a><a href="#lessons">5 Make it work</a><a href="#lessons">Graduate</a></div>
+      <div><p class="mono-label">Lessons</p><a href="/lesson/1">1 Get set up</a><a href="/lesson/2">2 First transaction</a><a href="/lesson/3">3 Talk to a contract</a><a href="/lesson/4">4 Deploy</a><a href="/lesson/5">5 Make it work</a><a href="#lessons">Graduate</a></div>
       <div><p class="mono-label">Resources</p><a href="https://dev-docs.botchain.ai/docs/intro" target="_blank" rel="noopener">BOT Chain docs</a><a href="https://faucet.botchain.ai/basic" target="_blank" rel="noopener">Faucet</a><a href="https://scan.bohr.life" target="_blank" rel="noopener">Testnet explorer</a><a href="https://github.com/Devs-GMT/BOTGuide" target="_blank" rel="noopener">BOTGuide</a></div>
       <div><p class="mono-label">Project</p><a href="#top">About</a><a href="https://github.com/Devs-GMT/first-block" target="_blank" rel="noopener">GitHub</a><a href="https://github.com/Devs-GMT/first-block/tree/main/contracts" target="_blank" rel="noopener">Contracts</a></div>
     </div>
@@ -385,7 +387,6 @@
     <p class="mono-bottom">© 2026 First Block · community project, not official BOT Chain education · never share your recovery phrase</p>
   </div>
 </footer>
-</main>
 
 <!-- Floating helper -->
 <div class="helper" id="helper">

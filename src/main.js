@@ -3,6 +3,8 @@ import { MAINNET_CONTRACT, TESTNET_PROGRESS, LINKS } from './config.js';
 import { mountLessons } from './lessonApp.js';
 import { io, sweepify } from './reveal.js';
 import { initWalletUI, initScan, initWall, initGraduates } from './live.js';
+import { learnView, lessonView } from './views.js';
+import { graduateView, wallView } from './views2.js';
 
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -215,6 +217,45 @@ initWalletUI();
 initScan();
 initWall();
 initGraduates();
+
+/* ---------- Router: home plus /learn, /lesson/1-5, /graduate, /wall ---------- */
+const homeEl = $('#home'), viewEl = $('#view');
+let unmount = null;
+const TITLES = { '/learn': 'Your path', '/graduate': 'Graduate', '/wall': 'Graduates' };
+function route() {
+  unmount?.(); unmount = null;
+  const path = location.pathname.replace(/\/+$/, '') || '/';
+  const m = path.match(/^\/lesson\/([1-5])$/);
+  let mount = null, title = 'First Block: your first steps on BOT Chain';
+  if (m) { mount = (r) => lessonView(r, +m[1]); title = `Lesson ${m[1]} · First Block`; }
+  else if (path === '/learn') { mount = learnView; title = `${TITLES[path]} · First Block`; }
+  else if (path === '/graduate') { mount = graduateView; title = `${TITLES[path]} · First Block`; }
+  else if (path === '/wall') { mount = wallView; title = `${TITLES[path]} · First Block`; }
+  document.title = title;
+  nav.classList.remove('open');
+  burger.innerHTML = icon('menu');
+  homeEl.hidden = !!mount;
+  viewEl.hidden = !mount;
+  if (mount) { viewEl.innerHTML = ''; unmount = mount(viewEl); }
+}
+const isView = (p) => /^\/(learn|graduate|wall|lesson\/[1-5])\/?$/.test(p);
+document.addEventListener('click', (e) => {
+  const a = e.target.closest('a[href]');
+  if (!a || a.target === '_blank' || e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+  const href = a.getAttribute('href');
+  if (href.startsWith('/') && isView(href)) {
+    e.preventDefault();
+    history.pushState({}, '', href); route(); scrollTo(0, 0);
+  } else if (href.startsWith('#') && href.length > 1 && !viewEl.hidden) {
+    e.preventDefault();
+    history.pushState({}, '', '/' + href); route();
+    requestAnimationFrame(() => document.querySelector(href)?.scrollIntoView());
+  } else if (href === '/' && !viewEl.hidden) {
+    e.preventDefault(); history.pushState({}, '', '/'); route(); scrollTo(0, 0);
+  }
+});
+addEventListener('popstate', route);
+route();
 
 /* ---------- Footer config ---------- */
 if (MAINNET_CONTRACT) {
