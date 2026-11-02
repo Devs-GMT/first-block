@@ -118,53 +118,20 @@
   </div>
   </div>
 
-  <div class="app fade fade-wheel" id="app" role="img" aria-label="Animated preview of a First Block lesson">
-    <div class="app-bar"><i></i><i></i><i></i><span>First Block · Lesson 3</span></div>
-    <div class="app-body">
-      <nav class="rail" aria-hidden="true">
-        <svg class="rail-mark" viewBox="0 0 34 34"><rect x="2" y="21" width="30" height="11" rx="4"/><rect x="2" y="11.5" width="22" height="8.5" rx="3.5"/><rect class="g" x="2" y="2" width="14" height="8.5" rx="3.5"/></svg>
-        <span class="rail-i on"><svg class="ic"><use href="#i-chat"/></svg><b></b></span>
-        <span class="rail-i"><svg class="ic"><use href="#i-wallet"/></svg></span>
-        <span class="rail-i"><svg class="ic"><use href="#i-send"/></svg></span>
-        <span class="rail-i"><svg class="ic"><use href="#i-rocket"/></svg></span>
-        <span class="rail-i"><svg class="ic"><use href="#i-counter"/></svg></span>
-        <span class="rail-i"><svg class="ic"><use href="#i-cap"/></svg></span>
-        <span class="rail-sp"></span>
-        <span class="rail-i"><svg class="ic"><use href="#i-doc"/></svg></span>
-        <span class="rail-i"><svg class="ic"><use href="#i-bell"/></svg></span>
-      </nav>
-      <section class="chat" id="chat">
-        <p class="chat-time">Lesson 3 · Talk to a contract</p>
-        <div class="msgs" id="msgs">
-          <div class="bubble guide st" data-s="1">Your wallet is on BOT Chain Testnet and lesson 2 is passed. Type your name and I'll send it to the Progress contract with <code>sayHello</code>.</div>
-          <div class="bubble user st" data-s="2"><span>Ada</span></div>
-          <div class="txcard st" data-s="3" id="tx">
-            <div class="tx-top"><span class="tx-spin"></span><svg class="ic sm tx-ok"><use href="#i-check"/></svg><code>progress.sayHello("Ada")</code><b class="tx-state">Sending…</b></div>
-            <p class="tx-meta">Confirmed in block #1,234,567 · gas used 48,210</p>
-          </div>
-          <div class="bubble guide st" data-s="4">Passed. Your hello is on the wall and lesson 4 is unlocked.</div>
-        </div>
-        <div class="composer" id="composer"><svg class="ic sm"><use href="#i-plus"/></svg><span class="ph" id="ph">Type your name</span><span class="typed" id="typed"></span><span class="caret"></span><button class="send" id="sendBtn" tabindex="-1" aria-hidden="true"><svg class="ic sm"><use href="#i-up"/></svg></button></div>
-        <p class="chat-foot">Checks run against the contract on BOT Chain testnet.</p>
-        <span class="vcursor" id="vcursor"><svg viewBox="0 0 20 20"><path d="M3 2l13 6-5.5 2L8.5 16 3 2z"/></svg></span>
-      </section>
-      <aside class="side" aria-hidden="true">
-        <div class="avatar"><svg viewBox="0 0 34 34"><rect x="2" y="21" width="30" height="11" rx="4"/><rect x="2" y="11.5" width="22" height="8.5" rx="3.5"/><rect x="2" y="2" width="14" height="8.5" rx="3.5"/></svg></div>
-        <p class="side-name">First Block</p>
-        <p class="side-status"><svg class="ic xs"><use href="#i-check"/></svg>Testnet connected</p>
-        <div class="side-chips"><span class="mini">Gas · 0.5 tBOT</span><span class="mini">Chain 968</span></div>
-        <div class="side-tabs"><span class="on"><svg class="ic sm"><use href="#i-check"/></svg></span><span><svg class="ic sm"><use href="#i-wallet"/></svg></span><span><svg class="ic sm"><use href="#i-doc"/></svg></span><span><svg class="ic sm"><use href="#i-cube"/></svg></span><span><svg class="ic sm"><use href="#i-bell"/></svg></span></div>
-        <p class="side-h">Today</p>
-        <ul class="feed" id="feed">
-          <li class="st" data-s="5"><span class="fi"><svg class="ic sm"><use href="#i-check"/></svg></span><div><b>Said hello to the chain</b><span>Done · just now</span></div></li>
-          <li class="on"><span class="fi"><svg class="ic sm"><use href="#i-check"/></svg></span><div><b>Sent 0.001 test BOT</b><span>Done · lesson 2</span></div></li>
-          <li class="on"><span class="fi"><svg class="ic sm"><use href="#i-check"/></svg></span><div><b>Added BOT Chain Testnet</b><span>Done · lesson 1</span></div></li>
-        </ul>
-        <div class="side-prog"><div class="prow"><span>Progress</span><b id="progNum">2 / 5</b></div><div class="pbar"><i id="progBar"></i></div><div class="pdots" id="pdots"><i class="d"></i><i class="d"></i><i class="d"></i><i class="d"></i><i class="d"></i><i class="d"></i></div></div>
-      </aside>
+  <div class="jcard fade fade-wheel" id="jcard" role="img" aria-label="Animated preview of your progress through the five lessons">
+    <div class="jc-head"><p class="eyebrow">Your journey</p><b class="jc-num" id="jcNum">0 / 5</b></div>
+    <div class="jc-chain">
+      <div class="jc-b"><span class="jc-sq">1</span><span class="jc-t">Get set up</span></div>
+      <div class="jc-b"><span class="jc-sq">2</span><span class="jc-t">First transaction</span></div>
+      <div class="jc-b"><span class="jc-sq">3</span><span class="jc-t">Talk to a contract</span></div>
+      <div class="jc-b"><span class="jc-sq">4</span><span class="jc-t">Deploy</span></div>
+      <div class="jc-b"><span class="jc-sq">5</span><span class="jc-t">Make it work</span></div>
+      <div class="jc-b gold"><span class="jc-sq"><svg class="ic"><use href="#i-cap"/></svg></span><span class="jc-t">Graduate</span></div>
     </div>
+    <div class="pbar"><i id="jcBar" style="width:0"></i></div>
+    <p class="jc-line" id="jcLine">Each block unlocks the next.</p>
   </div>
-  <p class="caption">Animated preview with example values. The real check runs against the contract once it's live.</p>
+  <p class="caption">A preview of your path. Once you connect, your real progress is read from the chain.</p>
 </section>
 
 <!-- 2 · The problem -->
@@ -209,30 +176,11 @@
       <div class="l-left" id="lLeft"></div>
       <div class="l-right">
         <div class="l-sticky">
-          <div class="app app-l" id="lApp" role="img" aria-label="Animated preview of the lesson">
-            <div class="app-bar"><i></i><i></i><i></i><span>First Block · Lesson 1</span></div>
-            <div class="app-body b">
-              <nav class="rail" aria-hidden="true">
-                <svg class="rail-mark" viewBox="0 0 34 34"><rect x="2" y="21" width="30" height="11" rx="4"/><rect x="2" y="11.5" width="22" height="8.5" rx="3.5"/><rect class="g" x="2" y="2" width="14" height="8.5" rx="3.5"/></svg>
-                <span class="rail-i" data-i="0"><svg class="ic"><use href="#i-wallet"/></svg></span>
-                <span class="rail-i" data-i="1"><svg class="ic"><use href="#i-send"/></svg></span>
-                <span class="rail-i" data-i="2"><svg class="ic"><use href="#i-chat"/></svg></span>
-                <span class="rail-i" data-i="3"><svg class="ic"><use href="#i-rocket"/></svg></span>
-                <span class="rail-i" data-i="4"><svg class="ic"><use href="#i-counter"/></svg></span>
-                <span class="rail-i" data-i="5"><svg class="ic"><use href="#i-cap"/></svg></span>
-                <span class="rail-sp"></span>
-                <span class="rail-i"><svg class="ic"><use href="#i-doc"/></svg></span>
-                <span class="rail-i"><svg class="ic"><use href="#i-bell"/></svg></span>
-              </nav>
-              <section class="chat narrow">
-                <p class="chat-time"></p>
-                <div class="msgs"></div>
-                <div class="composer small"><svg class="ic sm"><use href="#i-plus"/></svg><span class="ph">Ask for help</span><span class="send"><svg class="ic sm"><use href="#i-up"/></svg></span></div>
-                <p class="chat-foot">Checks run against the contract on testnet.</p>
-              </section>
-              <section class="main"></section>
-              <span class="vcursor"><svg viewBox="0 0 20 20"><path d="M3 2l13 6-5.5 2L8.5 16 3 2z"/></svg></span>
-            </div>
+          <div class="stage" id="lApp" role="img" aria-label="Animated preview of the lesson page">
+            <div class="stage-head"><span class="eyebrow" id="stEyebrow"></span><span class="chip self">Example values</span></div>
+            <ol class="steps-l" id="stSteps"></ol>
+            <div class="check" id="stCheck"></div>
+            <span class="vcursor" id="stCursor"><svg viewBox="0 0 20 20"><path d="M3 2l13 6-5.5 2L8.5 16 3 2z"/></svg></span>
           </div>
           <p class="caption" id="lCap"></p>
         </div>

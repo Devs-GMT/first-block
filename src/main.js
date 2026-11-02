@@ -87,61 +87,23 @@ $$('.reveal').forEach((el) => io.observe(el));
   new IntersectionObserver(([e]) => { on = e.isIntersecting; cancelAnimationFrame(raf); if (on && !reduce) raf = requestAnimationFrame(loop); }).observe(cv);
 })();
 
-/* ---------- Hero app preview: a scripted, looping walkthrough ---------- */
+/* ---------- Hero: animated "Your journey" card ---------- */
 (() => {
-  const app = $('#app');
-  if (!app) return;
-  const chat = $('#chat'), comp = $('#composer'), typed = $('#typed'), send = $('#sendBtn'), cur = $('#vcursor');
-  const msgs = $('#msgs'), tx = $('#tx'), bar = $('#progBar'), num = $('#progNum');
-  const dots = $$('#pdots .d'), steps = $$('.st', app);
-  const setDots = (s) => dots.forEach((d, i) => { d.className = 'd ' + (s[i] || ''); });
-  const BEFORE = ['done', 'done', 'cur', '', '', 'gold'], AFTER = ['done', 'done', 'done', 'cur', '', 'gold'];
-  const reset = () => {
-    steps.forEach((e) => e.classList.remove('show'));
-    msgs.classList.remove('out'); tx.classList.remove('ok');
-    $('.tx-state', tx).textContent = 'Sending…';
-    comp.className = 'composer'; typed.textContent = ''; send.className = 'send';
-    cur.classList.remove('on'); bar.style.width = '40%'; num.textContent = '2 / 5'; setDots(BEFORE);
+  const card = $('#jcard');
+  if (!card) return;
+  const blocks = $$('.jc-b', card), bar = $('#jcBar'), num = $('#jcNum'), line = $('#jcLine');
+  const MSG = ['Wallet has gas. Lesson 1 passed.', 'Transaction recorded. Lesson 2 passed.', 'Hello written to the chain. Lesson 3 passed.', 'Counter deployed and owned by you. Lesson 4 passed.', 'Count reached 3. Lesson 5 passed.', '5 of 5. Ready to graduate on mainnet.'];
+  const set = (d) => {
+    blocks.forEach((b, i) => { b.classList.toggle('done', i < d); b.classList.toggle('cur', i === d && i < 5); });
+    bar.style.width = `${Math.min(d, 5) * 20}%`;
+    num.textContent = `${Math.min(d, 5)} / 5`;
+    line.innerHTML = d ? `${icon('check', 'sm')}${MSG[d - 1]}` : 'Each block unlocks the next.';
   };
-  const finalState = () => {
-    steps.forEach((e) => e.classList.add('show')); tx.classList.add('ok');
-    $('.tx-state', tx).textContent = 'Confirmed'; bar.style.width = '60%'; num.textContent = '3 / 5'; setDots(AFTER);
-  };
-  const show = (n) => steps.filter((e) => e.dataset.s === String(n)).forEach((e) => e.classList.add('show'));
-  const moveTo = (el, dx = 0, dy = 0) => {
-    const c = chat.getBoundingClientRect(), r = el.getBoundingClientRect();
-    cur.style.transform = `translate(${r.left - c.left + r.width / 2 + dx}px, ${r.top - c.top + r.height / 2 + dy}px)`;
-  };
-  let run = 0;
-  const play = async () => {
-    const tok = ++run;
-    const w = (ms) => new Promise((res, rej) => setTimeout(() => (tok === run ? res() : rej()), ms));
-    try {
-      for (;;) {
-        reset();
-        const c = chat.getBoundingClientRect();
-        cur.style.transition = 'none'; cur.style.transform = `translate(${c.width - 120}px, ${c.height - 20}px)`; void cur.offsetWidth; cur.style.transition = '';
-        await w(600); show(1);
-        await w(1500); cur.classList.add('on'); moveTo($('#ph'), 40, 4);
-        await w(1100); comp.classList.add('focus');
-        for (const ch of 'Ada') { await w(190); typed.textContent += ch; comp.classList.add('typing'); }
-        send.classList.add('go');
-        await w(800); moveTo(send, 2, 2);
-        await w(1000); send.classList.add('pop');
-        await w(180); send.classList.remove('pop'); comp.classList.remove('focus', 'typing'); typed.textContent = ''; send.classList.remove('go'); show(2);
-        await w(300); moveTo(chat, 80, -40);
-        await w(500); show(3);
-        await w(1800); tx.classList.add('ok'); $('.tx-state', tx).textContent = 'Confirmed';
-        bar.style.width = '60%'; num.textContent = '3 / 5'; setDots(AFTER); show(5);
-        await w(1000); show(4); cur.classList.remove('on');
-        await w(5200); msgs.classList.add('out');
-        await w(900);
-      }
-    } catch (_) { /* cancelled */ }
-  };
-  if (reduce) { finalState(); return; }
-  reset();
-  new IntersectionObserver(([e]) => { if (e.isIntersecting) play(); else { run++; } }, { threshold: 0.35 }).observe(app);
+  set(0);
+  if (reduce) { set(3); return; }
+  let t = 0, d = 0;
+  const tick = () => { d = d > 6 ? 0 : d; set(d); d++; t = setTimeout(tick, d === 7 ? 3200 : 1250); };
+  new IntersectionObserver(([e]) => { clearTimeout(t); if (e.isIntersecting) tick(); }, { threshold: 0.3 }).observe(card);
 })();
 
 /* ---------- Lessons ---------- */
