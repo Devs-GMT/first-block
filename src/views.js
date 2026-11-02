@@ -106,7 +106,7 @@ const QUIZ = (tx) => {
   return [
     mk('Which one is your transaction hash?', tx.hash.slice(0, 10) + '…' + tx.hash.slice(-4), [alt(tx.hash, 0), alt(tx.hash, 1)].map((h) => h.slice(0, 10) + '…' + h.slice(-4))),
     mk('Which block is your transaction in?', `#${tx.block}`, [`#${tx.block + 7}`, `#${Math.max(1, tx.block - 12)}`]),
-    mk('How much gas did it use?', gas.toLocaleString(), [Math.round(gas * 1.9).toLocaleString(), Math.round(gas * 0.55).toLocaleString()]),
+    mk('How much gas did it use?', gas.toLocaleString('en-US'), [Math.round(gas * 1.9).toLocaleString('en-US'), Math.round(gas * 0.55).toLocaleString('en-US')]),
   ];
 };
 
@@ -205,7 +205,7 @@ export function lessonView(root, n) {
     const field = (k, v) => `<span class="hp-f"><span>${k}</span><b class="mono">${v}</b></span>`;
     return `<div class="happened"><div class="hp-diagram" aria-hidden="true"><span class="hp-node">${icon('wallet')}<i>Your wallet</i></span><span class="hp-arrow"></span><span class="hp-node">${icon('send')}<i>Transaction</i></span><span class="hp-arrow"></span><span class="hp-node">${icon('cube')}<i>Block</i></span></div>
       <p class="muted">${L.happened}</p>
-      ${t ? `<div class="hp-data">${field('hash', link('testnet', 'tx', t.hash))}${field('block', `#${t.block}`)}${field('gas used', t.gas ? Number(t.gas).toLocaleString() : '…')}</div>` : '<p class="muted sm">Your own transaction hash, block number and gas used appear here once you finish this lesson.</p>'}</div>`;
+      ${t ? `<div class="hp-data">${field('hash', link('testnet', 'tx', t.hash))}${field('block', `#${t.block}`)}${field('gas used', t.gas ? Number(t.gas).toLocaleString('en-US') : '…')}</div>` : '<p class="muted sm">Your own transaction hash, block number and gas used appear here once you finish this lesson.</p>'}</div>`;
   };
 
   const draw = () => {
@@ -213,7 +213,7 @@ export function lessonView(root, n) {
     const next = n < 5 ? `<a class="pill pill-dark" href="/lesson/${n + 1}">Next: lesson ${n + 1}</a>` : '<a class="pill pill-dark" href="/graduate">Next: graduate</a>';
     root.innerHTML = `<div class="v-wrap lv"><div class="lv-main"><a class="back" href="/learn">${icon('chev', 'back-ic')} All lessons</a>
       <p class="eyebrow">Lesson ${n} · ${L.title}</p><h1 class="v-title">${L.headline}</h1>
-      ${done() ? `<p class="done-note">${icon('check', 'sm')} You passed this lesson${tx ? ` · ${link('testnet', 'tx', tx.hash, 'view transaction')}` : ''}. You can redo it for practice.</p>` : ''}
+      ${done() ? `<p class="done-note">${icon('check', 'sm')}<span>You passed this lesson.${tx ? ` <a class="link-under" href="${NETWORKS.testnet.explorer}/tx/${tx.hash}" target="_blank" rel="noopener">View your transaction</a>.` : ''} You can redo it for practice.</span></p>` : ''}
       <section class="lv-sec"><h2>Why it matters</h2><p class="muted">${L.why}</p><p class="tip">${icon('shield', 'sm')}<span>${L.tip}</span></p></section>
       <section class="lv-sec"><h2>Do it</h2>${bannerHTML()}<ol class="steps-l">${stepsHTML()}</ol></section>
       <section class="lv-sec"><h2>Check</h2><div class="check">${checkHTML()}</div></section>

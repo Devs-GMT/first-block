@@ -57,4 +57,4 @@ export async function runTx(which, build, ui) {
   return receipt;
 }
 
-export const fmtBal = (v) => Number(formatEther(v)).toLocaleString(undefined, { maximumFractionDigits: 4 });
+export const fmtBal = (v) => Number(formatEther(v)).toLocaleString('en-US', { maximumFractionDigits: 4 });

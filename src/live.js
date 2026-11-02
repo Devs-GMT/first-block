@@ -88,7 +88,7 @@ export function initScan() {
     const res = await scanWallet(addr, (key, val) => {
       if (tok !== run) return;
       if (val === undefined) { failed = true; return setRow(key, 'err', 'Couldn\'t read'); }
-      if (key === 'balance') setRow(key, 'ok', `${Number(val).toLocaleString(undefined, { maximumFractionDigits: 4 })} tBOT`);
+      if (key === 'balance') setRow(key, 'ok', `${Number(val).toLocaleString('en-US', { maximumFractionDigits: 4 })} tBOT`);
       if (key === 'txs') setRow(key, 'ok', String(val));
       if (key === 'done') { if (val === null) setRow(key, 'na', 'Contract not live yet'); else { setRow(key, 'ok', `${val.count} of 5`); drawBlocks(val.count); } }
       if (key === 'graduate') { if (val === null) setRow(key, 'na', 'Contract not live yet'); else setRow(key, 'ok', val ? 'Yes' : 'Not yet'); }
@@ -142,13 +142,13 @@ export async function initGraduates() {
     const total = Number(await withRetry(() => g.total()));
     $('#gradPill').textContent = `${total} graduate${total === 1 ? '' : 's'}`;
     if (!total) return;
-    $('#gradTitle').textContent = `${total.toLocaleString()} builder${total === 1 ? '' : 's'} already took their first block.`;
+    $('#gradTitle').textContent = `${total.toLocaleString('en-US')} builder${total === 1 ? '' : 's'} already took their first block.`;
     const page = await withRetry(() => g.getGrads(Math.max(0, total - 12), 12));
     const p = progressRead();
     const cards = await Promise.all([...page].reverse().map(async (x, i) => {
       let verified = false;
       if (p) { try { verified = Number((await p.progressOf(x.wallet))[0]) === 5; } catch { /* leave Self-reported */ } }
-      const date = new Date(Number(x.at) * 1000).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+      const date = new Date(Number(x.at) * 1000).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
       return `<article class="grad-card"><div class="m-row"><code>${short(x.wallet)}</code><span class="chip ${verified ? '' : 'self'}">${verified ? '✓ Verified' : 'Self-reported'}</span></div><q>${x.note ? esc(x.note) : 'No note left.'}</q><span class="muted sm">${date}</span></article>`;
     }));
     holder.className = 'grads grad-row';

@@ -644,3 +644,20 @@ h1, h2, h3 { text-wrap: balance; }
   .stage { min-height: 0; padding: 18px; }
   .fake-in { min-width: 0; flex: 1; }
 }
+
+/* polish 3 — app views */
+.done-note span { flex: 1; }
+.v-wrap .banner { max-width: 760px; }
+.v-wrap .grad-empty { max-width: 560px; min-height: 0; }
+.v-wrap .card-cv { margin-top: 8px; }
+.v-wrap .m-h { margin-top: 8px; }
+@media (max-width: 960px) {
+  .hp-diagram { flex-wrap: nowrap; gap: 6px; }
+  .hp-node { min-width: 0; flex: 1; padding: 10px 6px; }
+  .hp-arrow { max-width: 18px; flex: 0 0 12px; }
+}
+@media (max-width: 960px) {
+  .journey .j-addr { white-space: nowrap; font-size: 12px; }
+  .chain { column-gap: 12px; }
+  .blk-wrap { width: calc(50% - 6px); }
+}

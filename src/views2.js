@@ -60,13 +60,13 @@ export function graduateView(root) {
     const five = st.prog.count === 5;
     let body;
     if (!MAINNET_CONTRACT) {
-      body = `<div class="banner"><span>The mainnet Graduation contract isn't deployed yet, so graduating opens soon. Your progress above is read live from testnet.</span></div>`;
+      body = `<div class="banner"><span>The mainnet Graduation contract isn't deployed yet, so graduating opens soon. Your progress above is read live from testnet.</span></div>${st.addr ? '<p class="m-h">Preview of your card</p><canvas id="cardCv" class="card-cv" width="1200" height="630"></canvas>' : ''}`;
     } else if (!hasWallet()) {
       body = '<div class="banner"><span>You need MetaMask to graduate.</span><a class="pill pill-dark sm" href="https://metamask.io/download/" target="_blank" rel="noopener">Install MetaMask</a></div>';
     } else if (!st.addr) {
       body = '<div class="banner"><span>Connect the wallet you used for the lessons.</span><button class="pill pill-dark sm" data-act="connect">Connect wallet</button></div>';
     } else if (mine) {
-      body = `<p class="done-note">${icon('check', 'sm')} You graduated${link('mainnet', 'address', MAINNET_CONTRACT, ' · view contract')}.</p>${cardHTML()}`;
+      body = `<p class="done-note">${icon('check', 'sm')}<span>You graduated. <a class="link-under" href="${NETWORKS.mainnet.explorer}/address/${MAINNET_CONTRACT}" target="_blank" rel="noopener">View the contract</a>.</span></p>${cardHTML()}`;
     } else if (!five) {
       body = `<div class="banner"><span>Finish all five lessons first. You're at ${st.prog.count} of 5.</span><a class="pill pill-dark sm" href="/learn">Back to your path</a></div>`;
     } else if (wallet.chainId !== NETWORKS.mainnet.id) {
@@ -81,13 +81,23 @@ export function graduateView(root) {
       <div class="g-prog"><span>Lessons passed</span><b>${st.prog.count} / 5</b><div class="pbar"><i style="width:${st.prog.count * 20}%"></i></div></div>
       ${body}</div>`;
     if (mine) paintCard();
+    else if (!MAINNET_CONTRACT && st.addr) paintPreview();
+  };
+
+  /** Before launch: the learner's own card, marked as a preview (no graduate number yet). */
+  const paintPreview = async () => {
+    const name = (await helloNameOf(st.addr)) || short(st.addr);
+    const cv = $('#cardCv', root);
+    if (!cv || !alive) return;
+    const date = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    drawCard(cv, { name, wallet: st.addr, date, id: '—', verified: st.prog.count === 5 });
   };
 
   const paintCard = async () => {
     const cv = $('#cardCv', root);
     if (!cv) return;
     const name = (await helloNameOf(st.addr)) || short(st.addr);
-    const date = new Date(mine.at * 1000).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+    const date = new Date(mine.at * 1000).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
     drawCard(cv, { name, wallet: st.addr, date, id: mine.id, verified: st.prog.count === 5 });
     const text = `I just graduated from First Block on @BOTChain_ai: five lessons, all checked on chain. Graduate #${mine.id}.`;
     $('#shareX', root).href = `https://x.com/intent/post?text=${encodeURIComponent(text)}&url=${encodeURIComponent(location.origin)}`;
@@ -99,7 +109,7 @@ export function graduateView(root) {
       const c = new Contract(MAINNET_CONTRACT, GRADUATION_ABI, prov);
       const gas = await c.graduate.estimateGas('', { from: st.addr });
       const fee = (await prov.getFeeData()).gasPrice;
-      estimate = `${Number(gas).toLocaleString()} gas${fee ? ` (${fmtBal(gas * fee)} BOT)` : ''}`;
+      estimate = `${Number(gas).toLocaleString('en-US')} gas${fee ? ` (${fmtBal(gas * fee)} BOT)` : ''}`;
     } catch { estimate = null; }
   };
 
@@ -155,7 +165,7 @@ export function wallView(root) {
       const p = progressRead();
       const ids = page.map((_, i) => total - i);
       const verified = await Promise.all(page.map(async (x) => { if (!p) return false; try { return Number((await p.progressOf(x.wallet))[0]) === 5; } catch { return false; } }));
-      draw(`<p class="muted sm">${total.toLocaleString()} graduate${total === 1 ? '' : 's'}</p><div class="wall-grid">${page.map((x, i) => `<article class="grad-card"><div class="m-row"><code>#${ids[i]} · ${short(x.wallet)}</code><span class="chip ${verified[i] ? '' : 'self'}">${verified[i] ? '✓ Verified' : 'Self-reported'}</span></div><q>${x.note ? esc(x.note) : 'No note left.'}</q><span class="muted sm">${new Date(Number(x.at) * 1000).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}</span></article>`).join('')}</div>`);
+      draw(`<p class="muted sm">${total.toLocaleString('en-US')} graduate${total === 1 ? '' : 's'}</p><div class="wall-grid">${page.map((x, i) => `<article class="grad-card"><div class="m-row"><code>#${ids[i]} · ${short(x.wallet)}</code><span class="chip ${verified[i] ? '' : 'self'}">${verified[i] ? '✓ Verified' : 'Self-reported'}</span></div><q>${x.note ? esc(x.note) : 'No note left.'}</q><span class="muted sm">${new Date(Number(x.at) * 1000).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</span></article>`).join('')}</div>`);
     } catch { draw('<p class="muted">Couldn\'t reach mainnet right now. <button class="link-under" onclick="location.reload()">Retry</button></p>'); }
   })();
   return () => { alive = false; };

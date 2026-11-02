@@ -171,7 +171,9 @@ export function mountLessons({ app, tabs, left }) {
     if (i === active) return;
     active = i;
     tabs.forEach((t, n) => t.setAttribute('aria-selected', n === i));
-    if (!wide()) tabs[i].scrollIntoView({ inline: 'center', block: 'nearest' });
+    // Center the active tab inside the scrollable bar only; scrollIntoView would also scroll the page.
+    const bar = tabs[i].parentElement;
+    if (!wide() && bar.scrollWidth > bar.clientWidth) bar.scrollTo({ left: tabs[i].offsetLeft - (bar.clientWidth - tabs[i].offsetWidth) / 2, behavior: reduce ? 'auto' : 'smooth' });
     blocks.forEach((b, n) => b.classList.toggle('active', n === i));
     if (visible) play(i); else (reduce ? renderFinal(i) : render(i));
   };
