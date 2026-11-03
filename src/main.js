@@ -4,7 +4,7 @@ import { mountLessons } from './lessonApp.js';
 import { io, sweepify } from './reveal.js';
 import { initWalletUI, initScan, initWall, initGraduates } from './live.js';
 import { learnView, lessonView } from './views.js';
-import { graduateView, wallView } from './views2.js';
+import { graduateView, wallView, docView } from './views2.js';
 
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -49,76 +49,85 @@ $$('#sheet a').forEach((a) => a.addEventListener('click', () => { nav.classList.
 $$('[data-sweep]').forEach(sweepify);
 $$('.reveal').forEach((el) => io.observe(el));
 
-/* ---------- Hero dial: a dotted dome with a comet that travels along it ---------- */
+/* ---------- Hero: the block path ----------
+   Six cubes climb from lesson 1 to graduation. Before a wallet is checked they demo the path, then they show
+   that wallet's real progress: grey is locked, light green is next, green has passed, amber is graduation. */
+const FACE = { t: '32,5.97 52.95,18.5 32,30.54 11.05,18.5', l: '8.62,21.17 30.79,33.22 30.79,58.27 8.62,45.5', r: '55.38,21.17 55.38,45.5 33.22,58.27 33.22,33.22' };
+const cubeSVG = (cls = '') => `<g class="hb ${cls}"><polygon class="t" points="${FACE.t}"/><polygon class="l" points="${FACE.l}"/><polygon class="r" points="${FACE.r}"/></g>`;
+const heroPath = (() => {
+  const el = $('#heroPath');
+  if (!el) return null;
+  const NAMES = ['Get set up', 'First transaction', 'Talk to a contract', 'Deploy', 'Make it work', 'Graduate'];
+  const X0 = 152, Y0 = 404, DX = 78, DY = -64, S = 1.56;
+  const cubes = NAMES.map((name, i) => {
+    const x = X0 + DX * i, y = Y0 + DY * i;
+    return `<g class="hp ${i === 5 ? 'gold' : ''}" data-i="${i}" transform="translate(${x} ${y})">
+      <g class="hp-drop" style="--d:${120 + i * 90}ms"><g transform="scale(${S})">${cubeSVG()}</g></g>
+      <text class="hl" x="-14" y="54" text-anchor="end"><tspan class="hl-n">${i === 5 ? '★' : String(i + 1).padStart(2, '0')}</tspan> ${name}</text></g>`;
+  }).join('');
+  el.innerHTML = `<svg viewBox="0 0 640 520" aria-hidden="true">
+    <defs><pattern id="isoDots" width="24" height="13.86" patternUnits="userSpaceOnUse"><circle cx="1.5" cy="1.5" r="1.3"/><circle cx="13.5" cy="8.43" r="1.3"/></pattern>
+      <radialGradient id="isoFade" cx="58%" cy="56%" r="46%"><stop offset="0" stop-color="#fff"/><stop offset=".55" stop-color="#fff" stop-opacity=".7"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+      <mask id="isoMask"><rect width="640" height="520" fill="url(#isoFade)"/></mask></defs>
+    <rect class="iso-grid" width="640" height="520" fill="url(#isoDots)" mask="url(#isoMask)"/>
+    <path class="hp-link" d="M${X0 + 50} ${Y0 + 47} ${Array.from({ length: 5 }, (_, i) => `L${X0 + 50 + DX * (i + 1)} ${Y0 + 47 + DY * (i + 1)}`).join(' ')}"/>
+    ${cubes}</svg>`;
+  const groups = $$('.hp', el);
+  let shown = -1;
+  const set = (done, { animate = true } = {}) => {
+    groups.forEach((g, i) => {
+      const was = g.classList.contains('done');
+      const now = i < 5 ? i < done : done >= 6;
+      g.classList.toggle('done', now);
+      g.classList.toggle('cur', !now && i === Math.min(done, 5) && done < 6);
+      if (animate && now && !was) { const c = $('.hp-drop', g); c.classList.remove('click'); void c.getBoundingClientRect(); c.classList.add('click'); }
+    });
+    shown = done;
+  };
+  set(0, { animate: false });
+  let timer = 0, demo = !reduce;
+  const step = () => { if (!demo) return; const next = shown >= 6 ? 0 : shown + 1; set(next); timer = setTimeout(step, next === 6 ? 3200 : next === 0 ? 900 : 1300); };
+  if (reduce) set(3, { animate: false });
+  else {
+    el.classList.add('in');
+    new IntersectionObserver(([e]) => { clearTimeout(timer); if (e.isIntersecting && demo) timer = setTimeout(step, 1600); }, { threshold: 0.3 }).observe(el);
+  }
+  return {
+    // A checked wallet replaces the demo with its real progress (null while the chain is being read).
+    show(done) { demo = false; clearTimeout(timer); el.classList.add('real'); set(done == null ? 0 : done, { animate: done != null }); groups.forEach((g) => g.classList.toggle('wait', done == null)); },
+  };
+})();
+document.addEventListener('fb:blocks', (e) => heroPath?.show(e.detail));
+
+/* ---------- Footer: on phones each link column folds into an accordion ---------- */
 (() => {
-  const cv = $('#dial');
-  if (!cv) return;
-  const ctx = cv.getContext('2d');
-  const TICKS = 15, GAP = 16;
-  let w = 0, h = 0, dpr = 1, on = true, raf = 0, geo = null;
-  const resize = () => {
-    dpr = Math.min(devicePixelRatio || 1, 2);
-    w = cv.clientWidth; h = cv.clientHeight;
-    cv.width = w * dpr; cv.height = h * dpr;
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    const r = Math.max(w * 0.46, 320), cx = w / 2, cy = 30 + r;
-    const cut = Math.asin(Math.min(Math.max((cy - h) / r, 0), 0.98)) * 180 / Math.PI;
-    const a0 = 180 + cut, a1 = 360 - cut;
-    const n = Math.max(12, Math.floor((r * (a1 - a0) * Math.PI / 180) / GAP));
-    geo = { r, cx, cy, a0, a1, n };
-  };
-  const draw = (time) => {
-    ctx.clearRect(0, 0, w, h);
-    const { r, cx, cy, a0, a1, n } = geo;
-    const phase = reduce ? 0.4 : time / 1000 * 0.32;
-    const head = 0.5 - 0.5 * Math.cos(phase);
-    const dir = Math.sin(phase) >= 0 ? 1 : -1;
-    const at = (u, inset = 0) => { const a = ((a0 + (a1 - a0) * u) * Math.PI) / 180; return [cx + Math.cos(a) * (r - inset), cy + Math.sin(a) * (r - inset)]; };
-    const hi = head * (n - 1);
-    for (let i = 0; i < n; i++) {
-      const di = (i - hi) * dir;
-      const [x, y] = at(i / (n - 1));
-      let size = 2.6, color = 'rgba(30,29,28,0.3)';
-      if (Math.abs(di) < 0.6) { size = 8; color = '#1e1d1c'; }
-      else if (di < 0 && di > -20) { const k = 1 + di / 20; size = 2.6 + 3 * k; color = `rgba(31,169,113,${0.3 + 0.7 * k})`; }
-      else if (di > 0 && di < 9) { const k = 1 - di / 9; size = 2.6 + 2.4 * k; color = `rgba(120,117,111,${0.4 + 0.4 * k})`; }
-      ctx.beginPath(); ctx.arc(x, y, size / 2, 0, 6.2832); ctx.fillStyle = color; ctx.fill();
-    }
-    ctx.lineCap = 'round';
-    for (let i = 0; i < TICKS; i++) {
-      const u = (i + 0.5) / TICKS, k = Math.max(0, 1 - Math.abs(u - head) / 0.1);
-      const [x1, y1] = at(u, 96), [x2, y2] = at(u, 146 + 18 * k);
-      ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2);
-      ctx.strokeStyle = `rgba(30,29,28,${0.14 + 0.6 * k})`; ctx.lineWidth = 1.5; ctx.stroke();
-    }
-  };
-  const loop = (t) => { draw(t); if (on && !reduce) raf = requestAnimationFrame(loop); };
-  resize(); draw(0);
-  addEventListener('resize', () => { resize(); if (reduce) draw(0); });
-  new IntersectionObserver(([e]) => { on = e.isIntersecting; cancelAnimationFrame(raf); if (on && !reduce) raf = requestAnimationFrame(loop); }).observe(cv);
+  const narrow = matchMedia('(max-width: 640px)');
+  $$('.foot-cols > div').forEach((col) => {
+    const label = $('.mono-label', col);
+    if (!label) return;
+    const btn = document.createElement('button');
+    btn.className = 'fcol-btn'; btn.type = 'button';
+    btn.innerHTML = `<span>${label.textContent}</span>${icon('chev', 'xs')}`;
+    label.replaceWith(btn);
+    const sync = () => { const open = !narrow.matches || col.classList.contains('open'); btn.setAttribute('aria-expanded', open); btn.disabled = !narrow.matches; };
+    btn.addEventListener('click', () => { col.classList.toggle('open'); sync(); });
+    narrow.addEventListener('change', sync); sync();
+  });
 })();
 
-/* ---------- Hero: animated "Your path" window ---------- */
+/* ---------- Who it's for: small block scenes, one per audience ---------- */
 (() => {
-  const card = $('#jcard');
-  if (!card) return;
-  const nodes = $$('.jn', card), num = $('#jcNum'), line = $('#jcLine'), xp = $('#jcXp');
-  const MSG = ['Wallet has gas. Lesson 1 passed.', 'Transaction recorded. Lesson 2 passed.', 'Hello written to the chain. Lesson 3 passed.', 'Counter deployed and owned by you. Lesson 4 passed.', 'Count reached 3. Lesson 5 passed.', 'Graduated on BOT Chain mainnet.'];
-  const set = (d) => {
-    nodes.forEach((n, i) => {
-      n.classList.toggle('done', i < d);
-      n.classList.toggle('cur', i === d);
-      $('.jn-dot', n).innerHTML = i < d ? icon('check', 'sm') : i === 5 ? icon('cap', 'sm') : String(i + 1);
-    });
-    num.textContent = d >= 6 ? 'Graduated' : `${Math.min(d, 5)} of 5`;
-    line.innerHTML = d ? `${icon('check', 'sm')}${MSG[d - 1]}` : 'Each block unlocks the next.';
-    xp.classList.remove('on'); if (d && d < 6) { void xp.offsetWidth; xp.classList.add('on'); }
-  };
-  set(0);
-  if (reduce) { set(3); return; }
-  let t = 0, d = 0;
-  const tick = () => { if (d > 6) d = 0; set(d); d++; t = setTimeout(tick, d === 7 ? 3400 : 1500); };
-  new IntersectionObserver(([e]) => { clearTimeout(t); if (e.isIntersecting) tick(); }, { threshold: 0.3 }).observe(card);
+  const P = { 0: [[0, 0, 0], [1.15, 0, 0]], 1: [[0, 0, 0], [0, 0, 1], [0, 0, 2]], 2: [[0, 0, 0], [1, 0, 0], [0, 1, 0], [1, 1, 0]], 3: [[0, 0, 0], [1, 0, 0], [0.5, 0.5, 1]], 4: [[-1.1, 0, 0], [0, -1.1, 0], [1.1, 0, 0], [0, 1.1, 0], [0, 0, 0]] };
+  $$('#who .who').forEach((card, k) => {
+    const cells = (P[k] || P[0]).map(([gx, gy, gz]) => ({ x: (gx - gy) * 25, y: (gx + gy) * 14.4 - gz * 29, z: gx + gy + gz * 0.01 }))
+      .sort((a, b) => a.z - b.z || b.y - a.y);
+    const svg = cells.map((c, i) => `<g transform="translate(${c.x} ${c.y}) scale(.8)">${cubeSVG(i === cells.length - 1 ? 'done' : 'ink')}</g>`).join('');
+    const art = document.createElement('div');
+    art.className = 'who-art'; art.setAttribute('aria-hidden', 'true');
+    art.innerHTML = `<svg viewBox="-70 -60 190 150">${svg}</svg>`;
+    $('.ic.lg', card)?.remove();
+    card.insertBefore(art, $('h3', card));
+  });
 })();
 
 /* ---------- Lessons ---------- */
@@ -204,7 +213,7 @@ initGraduates();
 /* ---------- Router: home plus /learn, /lesson/1-5, /graduate, /wall ---------- */
 const homeEl = $('#home'), viewEl = $('#view');
 let unmount = null;
-const TITLES = { '/learn': 'Your path', '/graduate': 'Graduate', '/wall': 'Graduates' };
+const TITLES = { '/learn': 'Your path', '/graduate': 'Graduate', '/wall': 'Graduates', '/privacy': 'Privacy', '/terms': 'Terms' };
 function route() {
   unmount?.(); unmount = null;
   const path = location.pathname.replace(/\/+$/, '') || '/';
@@ -214,6 +223,7 @@ function route() {
   else if (path === '/learn') { mount = learnView; title = `${TITLES[path]} · First Block`; }
   else if (path === '/graduate') { mount = graduateView; title = `${TITLES[path]} · First Block`; }
   else if (path === '/wall') { mount = wallView; title = `${TITLES[path]} · First Block`; }
+  else if (path === '/privacy' || path === '/terms') { mount = (r) => docView(r, path.slice(1)); title = `${TITLES[path]} · First Block`; }
   document.title = title;
   nav.classList.remove('open');
   burger.innerHTML = icon('menu');
@@ -221,7 +231,7 @@ function route() {
   viewEl.hidden = !mount;
   if (mount) { viewEl.innerHTML = ''; unmount = mount(viewEl); }
 }
-const isView = (p) => /^\/(learn|graduate|wall|lesson\/[1-5])\/?$/.test(p);
+const isView = (p) => /^\/(learn|graduate|wall|privacy|terms|lesson\/[1-5])\/?$/.test(p);
 document.addEventListener('click', (e) => {
   const a = e.target.closest('a[href]');
   if (!a || a.target === '_blank' || e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;

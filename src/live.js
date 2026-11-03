@@ -71,9 +71,8 @@ export function initScan() {
     $('.s-ic', li).innerHTML = state === 'ok' ? icon('check', 'sm') : state === 'na' ? '–' : state === 'err' ? '!' : '<span class="spin"></span>';
     $('.s-v', li).textContent = value ?? '';
   };
-  const drawBlocks = (done) => {
-    $('.s-blocks', panel).innerHTML = [1, 2, 3, 4, 5].map((n) => `<i class="${done != null && n <= done ? 'done' : ''}"></i>`).join('') + '<i class="gold"></i>';
-  };
+  // The hero's block path shows the checked wallet's progress.
+  const drawBlocks = (done, graduated = false) => document.dispatchEvent(new CustomEvent('fb:blocks', { detail: done == null ? null : graduated && done === 5 ? 6 : done }));
 
   const check = async (addr) => {
     const tok = ++run;
@@ -81,7 +80,8 @@ export function initScan() {
     panel.hidden = false;
     panel.innerHTML = `<div class="s-head"><b class="mono">${short(addr)}</b><span class="chip">BOT Chain Testnet</span></div>
       <ul class="s-list">${rowHTML('found', 'Wallet address')}${rowHTML('balance', 'Test BOT balance')}${rowHTML('txs', 'Transactions sent')}${rowHTML('done', 'Lessons passed')}${rowHTML('graduate', 'Graduated on mainnet')}</ul>
-      <div class="s-blocks"></div><div class="s-foot"></div>`;
+      <div class="s-foot"></div>`;
+    let lastDone = null;
     drawBlocks(null);
     setRow('found', 'ok', 'Valid');
     let failed = false;
@@ -90,8 +90,8 @@ export function initScan() {
       if (val === undefined) { failed = true; return setRow(key, 'err', 'Couldn\'t read'); }
       if (key === 'balance') setRow(key, 'ok', `${Number(val).toLocaleString('en-US', { maximumFractionDigits: 4 })} tBOT`);
       if (key === 'txs') setRow(key, 'ok', String(val));
-      if (key === 'done') { if (val === null) setRow(key, 'na', 'Contract not live yet'); else { setRow(key, 'ok', `${val.count} of 5`); drawBlocks(val.count); } }
-      if (key === 'graduate') { if (val === null) setRow(key, 'na', 'Contract not live yet'); else setRow(key, 'ok', val ? 'Yes' : 'Not yet'); }
+      if (key === 'done') { if (val === null) setRow(key, 'na', 'Contract not live yet'); else { lastDone = val.count; setRow(key, 'ok', `${val.count} of 5`); drawBlocks(val.count); } }
+      if (key === 'graduate') { if (val === null) setRow(key, 'na', 'Contract not live yet'); else { setRow(key, 'ok', val ? 'Yes' : 'Not yet'); if (val && lastDone === 5) drawBlocks(5, true); } }
     });
     if (tok !== run) return;
     const foot = $('.s-foot', panel);
@@ -141,6 +141,8 @@ export async function initGraduates() {
   const render = async () => {
     const total = Number(await withRetry(() => g.total()));
     $('#gradPill').textContent = `${total} graduate${total === 1 ? '' : 's'}`;
+    const trust = $('#heroTrust');
+    if (trust) { $('span', trust).textContent = total ? `${total.toLocaleString('en-US')} graduate${total === 1 ? '' : 's'} on BOT Chain mainnet` : 'Graduate #1 on BOT Chain mainnet is still open'; trust.hidden = false; }
     if (!total) return;
     $('#gradTitle').textContent = `${total.toLocaleString('en-US')} builder${total === 1 ? '' : 's'} already took their first block.`;
     const page = await withRetry(() => g.getGrads(Math.max(0, total - 12), 12));

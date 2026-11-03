@@ -31,7 +31,7 @@ const SCENES = [
     } },
   { okText: 'The contract confirmed lesson 2.',
     steps: [li('Send 0.001 test BOT', 'Press Send and confirm in MetaMask. The contract records your tip.', btn('go', 'Send 0.001 test BOT') + txs('go')),
-      li('Open it on the explorer', 'Find your three numbers: hash, block and gas.', '<span class="hp-data st" data-k="data"><span class="hp-f"><span>hash</span><b class="mono">0x3f9a…b1c2</b></span><span class="hp-f"><span>block</span><b class="mono">#1,234,567</b></span><span class="hp-f"><span>gas used</span><b class="mono">21,000</b></span></span>')],
+      li('Open it on the explorer', 'Find your three numbers: hash, block and gas.', '<span class="hp-data st" data-k="data"><span class="hp-f"><span>hash</span><b class="mono">0x3f9a…b1c2</b></span><span class="hp-f"><span>block</span><b class="mono">#1,234,567</b></span><span class="hp-f"><span>gas used</span><b class="mono">33,717</b></span></span>')],
     async run(h) {
       await h.w(900); await h.press('go'); await h.tx('go', '0x3f9a…b1c2', '1,234,567'); h.ok(0);
       await h.w(500); h.show('data'); h.ok(1);
@@ -92,7 +92,7 @@ export function mountLessons({ app, tabs, left }) {
   const wide = () => matchMedia('(min-width: 961px)').matches;
   let run = 0, active = -1, visible = false;
 
-  left.innerHTML = COPY.map((L, i) => `<div class="l-block" data-i="${i}"><div class="col-text"><p class="eyebrow">${L.eyebrow}</p><h3 data-sweep>${L.title}</h3><p class="muted">${L.body}</p><div class="lrows"><div class="lrow">${icon('send')}<div><b>${L.do[0]}</b><span>${L.do[1]}</span></div></div><div class="lrow">${icon('doc')}<div><b>${L.learn[0]}</b><span>${L.learn[1]}</span></div></div></div></div></div>`).join('');
+  left.innerHTML = COPY.map((L, i) => `<div class="l-block" data-i="${i}"><div class="col-text"><p class="eyebrow"><svg class="ic"><use href="#i-cube"/></svg>${L.eyebrow}</p><h3 data-sweep>${L.title}</h3><p class="muted">${L.body}</p><div class="lrows"><div class="lrow">${icon('send')}<div><b>${L.do[0]}</b><span>${L.do[1]}</span></div></div><div class="lrow">${icon('doc')}<div><b>${L.learn[0]}</b><span>${L.learn[1]}</span></div></div></div></div></div>`).join('');
   const blocks = $$('.l-block', left);
   // Faded blocks are clickable shortcuts to their lesson, like the reference's inactive features.
   blocks.forEach((b, i) => b.addEventListener('click', () => { if (!b.classList.contains('active')) goTo(i); }));
@@ -143,7 +143,7 @@ export function mountLessons({ app, tabs, left }) {
         await w(5200);
       },
       confetti: () => {
-        const cols = ['#1fa971', '#f5b83d', '#1e1d1c'];
+        const cols = ['#1fa971', '#f5b83d', '#15171a'];
         for (let n = 0; n < 18; n++) {
           const e = document.createElement('i'); e.className = 'cf';
           e.style.cssText = `left:${30 + Math.random() * 40}%;background:${cols[n % 3]};--dx:${(Math.random() - .5) * 220}px;--r:${Math.random() * 540}deg;animation-delay:${Math.random() * .15}s`;

@@ -137,11 +137,14 @@ Lessons 2 to 5 revert until the lesson before them has passed.
 
 | Route | What it is |
 | --- | --- |
-| `/` | Landing page: hero with a wallet check, lessons, who it's for, checks, glossary, live wall, graduates, FAQ |
+| `/` | Landing page: hero with a wallet check and the block path, lessons, who it's for, checks, glossary, live wall, graduates, FAQ |
 | `/learn` | Your path: five blocks and Graduate, with your progress |
 | `/lesson/1` to `/lesson/5` | Why it matters, Learn, Do it, Check, What just happened, Key ideas |
 | `/graduate` | The mainnet graduation form and your card |
 | `/wall` | Every graduate, with Verified or Self-reported |
+| `/privacy`, `/terms` | What stays in your browser, what goes on chain, and the terms of this community project |
+
+The hero's block path is six cubes, one per lesson plus graduation. Paste a wallet into the hero and they show that wallet's real progress, read from the Progress contract: grey is locked, light green is next, green has passed.
 
 ## Contracts
 

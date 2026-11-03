@@ -10,22 +10,22 @@ const $ = (s, r = document) => r.querySelector(s);
 export function drawCard(canvas, { name, wallet: w, date, id, verified }) {
   const W = 1200, H = 630, c = canvas.getContext('2d');
   canvas.width = W; canvas.height = H;
-  c.fillStyle = '#f7f6f3'; c.fillRect(0, 0, W, H);
+  c.fillStyle = '#f2f3ef'; c.fillRect(0, 0, W, H);
   c.fillStyle = '#ffffff'; roundRect(c, 40, 40, W - 80, H - 80, 36); c.fill();
   c.lineWidth = 4; c.strokeStyle = '#f5b83d'; roundRect(c, 40, 40, W - 80, H - 80, 36); c.stroke();
   // logo mark: one cube with a green top
   const face = (pts, col) => { c.fillStyle = c.strokeStyle = col; c.lineWidth = 1.6; c.lineJoin = 'round'; c.beginPath(); pts.split(' ').forEach((p, i) => { const [x, y] = p.split(',').map((n) => n * 1.1); c[i ? 'lineTo' : 'moveTo'](92 + x, 66 + y); }); c.closePath(); c.fill(); c.stroke(); };
-  face('32,5.97 52.95,18.5 32,30.54 11.05,18.5', '#1fa971'); face('8.62,21.17 30.79,33.22 30.79,58.27 8.62,45.5', '#1e1d1c'); face('55.38,21.17 55.38,45.5 33.22,58.27 33.22,33.22', '#4b4945');
-  c.fillStyle = '#1e1d1c'; c.font = '600 30px Inter, system-ui, sans-serif'; c.fillText('First Block', 176, 124);
-  c.fillStyle = '#78756f'; c.font = '500 24px Inter, system-ui, sans-serif'; c.fillText('Graduate', 96, 230);
-  c.fillStyle = '#1e1d1c'; c.font = '500 76px Inter, system-ui, sans-serif';
+  face('32,5.97 52.95,18.5 32,30.54 11.05,18.5', '#1fa971'); face('8.62,21.17 30.79,33.22 30.79,58.27 8.62,45.5', '#15171a'); face('55.38,21.17 55.38,45.5 33.22,58.27 33.22,33.22', '#3d4046');
+  c.fillStyle = '#15171a'; c.font = '600 30px Inter, system-ui, sans-serif'; c.fillText('First Block', 176, 124);
+  c.fillStyle = '#6b7078'; c.font = '500 24px Inter, system-ui, sans-serif'; c.fillText('Graduate', 96, 230);
+  c.fillStyle = '#15171a'; c.font = '500 76px Inter, system-ui, sans-serif';
   const nm = name.length > 18 ? name.slice(0, 17) + '…' : name;
   c.fillText(nm, 96, 316);
-  c.fillStyle = '#78756f'; c.font = '400 28px "JetBrains Mono", ui-monospace, monospace'; c.fillText(w, 96, 376);
-  c.fillStyle = '#1e1d1c'; c.font = '500 30px Inter, system-ui, sans-serif'; c.fillText(`Graduate #${id}  ·  ${date}`, 96, 450);
-  c.fillStyle = verified ? '#0f7a50' : '#78756f'; c.font = '500 28px Inter, system-ui, sans-serif';
+  c.fillStyle = '#6b7078'; c.font = '400 28px "JetBrains Mono", ui-monospace, monospace'; c.fillText(w, 96, 376);
+  c.fillStyle = '#15171a'; c.font = '500 30px Inter, system-ui, sans-serif'; c.fillText(`Graduate #${id}  ·  ${date}`, 96, 450);
+  c.fillStyle = verified ? '#0f7a50' : '#6b7078'; c.font = '500 28px Inter, system-ui, sans-serif';
   c.fillText(verified ? '5/5 ✓ verified on testnet' : '5/5 self-reported', 96, 500);
-  c.fillStyle = '#1e1d1c'; c.font = '500 24px Inter, system-ui, sans-serif'; c.textAlign = 'right'; c.fillText('BOT Chain mainnet', W - 96, H - 84); c.textAlign = 'left';
+  c.fillStyle = '#15171a'; c.font = '500 24px Inter, system-ui, sans-serif'; c.textAlign = 'right'; c.fillText('BOT Chain mainnet', W - 96, H - 84); c.textAlign = 'left';
 }
 function roundRect(c, x, y, w, h, r) { c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); }
 
@@ -160,7 +160,7 @@ export function graduateView(root) {
 }
 
 function confetti() {
-  const cols = ['#1fa971', '#f5b83d', '#1e1d1c'];
+  const cols = ['#1fa971', '#f5b83d', '#15171a'];
   for (let i = 0; i < 40; i++) {
     const s = document.createElement('i'); s.className = 'cf cf-page';
     s.style.cssText = `left:${10 + Math.random() * 80}%;background:${cols[i % 3]};--dx:${(Math.random() - .5) * 320}px;--r:${Math.random() * 720}deg;animation-delay:${Math.random() * .3}s`;
@@ -187,4 +187,28 @@ export function wallView(root) {
     } catch { draw('<p class="muted">Couldn\'t reach mainnet right now. <button class="link-under" onclick="location.reload()">Retry</button></p>'); }
   })();
   return () => { alive = false; };
+}
+
+/* ================= /privacy and /terms ================= */
+const DOCS = {
+  privacy: ['Privacy', 'Short version: there are no accounts, no cookies and no analytics.', [
+    ['What stays in your browser', 'XP, day streaks, whether you connected before, and the address of the Counter you deployed are kept in your browser\'s local storage. Clearing your browser data removes them.'],
+    ['What goes to the chain', 'Lesson actions, your hello name and your graduation note are transactions on public blockchains. They are public and permanent, so use a nickname if you prefer.'],
+    ['Who sees your requests', 'The page reads BOT Chain through its public RPCs (rpc.bohr.life and rpc.botchain.ai). Like any web server, they and the hosting provider can see your IP address and the addresses being looked up.'],
+    ['What we never ask for', 'Your secret recovery phrase or private keys. Your wallet signs every transaction itself.'],
+  ]],
+  terms: ['Terms', 'First Block is a free community project to learn BOT Chain. It is not official BOT Chain education.', [
+    ['As is', 'The site and contracts are provided as they are, without warranty. Lessons can have mistakes, and the official BOT Chain docs always win.'],
+    ['Testnet and mainnet', 'Lessons 1 to 5 use BOT Chain testnet, whose coins have no value. Graduation is a mainnet transaction and costs a little real BOT for gas, paid from your wallet.'],
+    ['Your wallet, your call', 'You decide what your wallet signs. Check every transaction before you confirm it, and never share your recovery phrase.'],
+    ['Public content', 'Names and notes you write on chain can\'t be edited or removed. Don\'t write personal information there.'],
+    ['Open source', 'The code and contracts are on GitHub, so anyone can read exactly what they do.'],
+  ]],
+};
+export function docView(root, kind) {
+  const [title, lead, parts] = DOCS[kind];
+  root.innerHTML = `<div class="v-wrap doc"><p class="eyebrow">${icon('shield')}${title}</p><h1 class="v-title">${title}</h1><p class="muted v-lead">${lead}</p>
+    ${parts.map(([h, p]) => `<section class="doc-sec"><h2>${h}</h2><p class="muted">${p}</p></section>`).join('')}
+    <p class="muted sm doc-foot">Questions? <a class="link-under" href="${LINKS.github}" target="_blank" rel="noopener">Open an issue on GitHub</a>.</p></div>`;
+  return () => {};
 }
