@@ -960,3 +960,10 @@ h1, h2, h3 { text-wrap: balance; }
   .l-block:not(.active):hover > .col-text { opacity: .5; }
 }
 @media (prefers-reduced-motion: reduce) { .l-block > .col-text { transition: none; } }
+
+/* MetaMask tile: the supplied white wallet mark on a solid brand-orange square */
+.int-sq.mm { background: #f6851b; }
+.int-sq.mm img { width: 26px; height: 26px; display: block; }
+/* small badge in the corner of a BOT Chain tile (T = testnet, search = explorer, drop = faucet) */
+.int-tag { display: grid; place-items: center; }
+.int-tag .ic { width: 11px; height: 11px; stroke-width: 2.2; color: var(--ink); }
