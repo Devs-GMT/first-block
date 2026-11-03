@@ -967,3 +967,18 @@ h1, h2, h3 { text-wrap: balance; }
 /* small badge in the corner of a BOT Chain tile (T = testnet, search = explorer, drop = faucet) */
 .int-tag { display: grid; place-items: center; }
 .int-tag .ic { width: 11px; height: 11px; stroke-width: 2.2; color: var(--ink); }
+
+/* glossary tiles: word and meaning up front (like the reference grid), the back says where it is used */
+.tiles { gap: 12px; }
+.tile { height: 156px; }
+.tile-f { flex-direction: column; align-items: flex-start; justify-content: flex-start; gap: 6px; padding: 18px 18px 16px; }
+.tile-top { display: flex; align-items: center; justify-content: space-between; width: 100%; margin-bottom: 6px; }
+.tile-tag { font: 500 11px/1 var(--mono); font-style: normal; color: var(--muted); padding: 4px 7px; border-radius: 6px; background: var(--soft); }
+.tile-f b { font-size: 16px; line-height: 22px; }
+.tile-def { font-size: 13px; line-height: 19px; color: var(--muted); font-weight: 400; text-align: left; }
+.tile-b { align-items: flex-start; justify-content: flex-end; gap: 4px; padding: 18px; text-align: left; }
+.tile-k { font: 500 11px/1 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: #8f8b84; }
+.tile-b b { font-size: 16px; line-height: 22px; font-weight: 500; color: #fff; }
+.t-g .tile-b { background: #0f5c40; } .t-b .tile-b { background: #1d3f86; } .t-v .tile-b { background: #3e2c8a; } .t-a .tile-b { background: #6b4a0c; }
+.t-g .tile-k, .t-b .tile-k, .t-v .tile-k, .t-a .tile-k { color: rgba(255,255,255,.65); }
+@media (max-width: 960px) { .tile { height: 168px; } .tile-def { font-size: 12.5px; } }

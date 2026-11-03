@@ -130,7 +130,9 @@ const WORDS = [
   ['shield', 'Mainnet', 'The real chain, where BOT has value. Graduation lives here.'],
 ];
 const GROUP = { Wallet: 'g', Network: 'g', Faucet: 'g', Gas: 'g', Transaction: 'b', Block: 'b', Explorer: 'b', Contract: 'v', Function: 'v', Event: 'v', Testnet: 'a', Mainnet: 'a' };
-$('#tiles').innerHTML = WORDS.map(([ic, name, def]) => `<button class="tile reveal t-${GROUP[name]}" aria-label="${name}: ${def}"><span class="tile-in"><span class="tile-f">${icon(ic)}<b>${name}</b></span><span class="tile-b">${def}</span></span></button>`).join('');
+// Where each word first comes up in the course (shown on the back of the tile).
+const USED = { Wallet: ['L1', 'Lesson 1 · Get set up'], Network: ['L1', 'Lesson 1 · Get set up'], Faucet: ['L1', 'Lesson 1 · Get set up'], Gas: ['L1', 'Lesson 1 · Get set up'], Transaction: ['L2', 'Lesson 2 · First transaction'], Block: ['L2', 'Lesson 2 · First transaction'], Explorer: ['L2', 'Lesson 2 · First transaction'], Contract: ['L3', 'Lessons 3 and 4 · Contracts'], Function: ['L3', 'Lesson 3 · Talk to a contract'], Event: ['L3', 'Lesson 3 · Talk to a contract'], Testnet: ['L1–5', 'Every lesson runs on testnet'], Mainnet: ['Grad', 'Graduation, one mainnet transaction'] };
+$('#tiles').innerHTML = WORDS.map(([ic, name, def]) => `<button class="tile reveal t-${GROUP[name]}" aria-label="${name}: ${def} Used in ${USED[name][1]}."><span class="tile-in"><span class="tile-f"><span class="tile-top">${icon(ic)}<i class="tile-tag">${USED[name][0]}</i></span><b>${name}</b><span class="tile-def">${def}</span></span><span class="tile-b"><span class="tile-k">Where you'll use it</span><b>${USED[name][1]}</b></span></span></button>`).join('');
 $$('.tile').forEach((t) => { io.observe(t); t.addEventListener('click', () => t.classList.toggle('flip')); });
 
 /* ---------- Live demo stream (example hellos until the contract is live) ---------- */
