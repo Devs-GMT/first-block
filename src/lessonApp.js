@@ -67,7 +67,7 @@ const SCENES = [
     steps: [li('Switch to BOT Chain Mainnet', 'Graduation happens on mainnet and uses a little real BOT for gas.', btn('sw', 'Switch to Mainnet')),
       li('Add a note and graduate', '80 characters at most, and it is optional.', `<span class="row-a">${fakeIn('note', 'Your note')}<button class="pill pill-dark big gold" data-b="grad" tabindex="-1">Graduate</button></span>` + txs('grad'))],
     async run(h) {
-      await h.w(900); await h.press('sw'); h.label('sw', 'On mainnet'); h.ok(0);
+      await h.w(900); await h.press('sw'); h.label('sw', 'On mainnet'); h.net('Mainnet'); h.ok(0);
       await h.w(600); await h.move('note', 40); h.focus('note'); await h.type('note', 'Next I\'m building a poll app!', 55);
       await h.w(400); await h.press('grad'); h.blur('note'); await h.tx('grad', '0x84b1…d3a7', '7,812,044'); h.ok(1); h.confetti();
       await h.passed();
@@ -80,6 +80,14 @@ export function mountLessons({ app, tabs, left }) {
   const drawDots = (i, passedNow) => {
     const done = i === 5 ? 5 : i + (passedNow ? 1 : 0);
     dots.innerHTML = [0, 1, 2, 3, 4].map((n) => `<i class="${n < done ? 'done' : n === i ? 'cur' : ''}"></i>`).join('') + `<i class="gold${i === 5 && passedNow ? ' done' : ''}"></i>`;
+    $$('.st-rail [data-r]', app).forEach((r) => {
+      const n = +r.dataset.r;
+      r.classList.toggle('done', n < 5 ? n < done : i === 5 && passedNow);
+      r.classList.toggle('cur', n === i && !(n < done) && !(i === 5 && passedNow));
+    });
+    $('#stProg', app).textContent = `${done} / 5`;
+    $('#stXp', app).textContent = String(done * 150);
+    $('#stBar', app).style.width = `${done * 20}%`;
   };
   const wide = () => matchMedia('(min-width: 961px)').matches;
   let run = 0, active = -1, visible = false;
@@ -108,6 +116,7 @@ export function mountLessons({ app, tabs, left }) {
     const h = {
       w,
       label: (id, t) => { b(id).textContent = t; },
+      net: (t) => { const e = $('#stNet', app); e.textContent = t; e.classList.toggle('main', t === 'Mainnet'); },
       ok: (n) => $$(':scope > li', steps)[n]?.classList.add('ok'),
       desc: (n, html) => { $$(':scope > li', steps)[n].querySelector('.muted').innerHTML = html; },
       show: (key) => k(key)?.classList.add('show'),
@@ -145,6 +154,7 @@ export function mountLessons({ app, tabs, left }) {
   const render = (i) => {
     eyebrow.textContent = COPY[i].eyebrow;
     url.textContent = `First Block · ${i === 5 ? '/graduate' : `/lesson/${i + 1}`}`;
+    const net = $('#stNet', app); net.textContent = 'Testnet'; net.classList.remove('main');
     drawDots(i, false);
     cap.textContent = COPY[i].cap;
     steps.innerHTML = SCENES[i].steps.join('');

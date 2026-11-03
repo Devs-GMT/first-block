@@ -178,12 +178,28 @@
         <div class="l-sticky">
           <div class="stage" id="lApp" role="img" aria-label="Animated preview of the lesson page">
             <div class="stage-bar" aria-hidden="true"><i></i><i></i><i></i><span id="stUrl">First Block · /lesson/1</span></div>
-            <div class="stage-body">
-              <div class="stage-head"><span class="eyebrow" id="stEyebrow"></span><span class="stage-dots" id="stDots"></span></div>
-              <p class="stage-h">Do it</p>
-              <ol class="steps-l" id="stSteps"></ol>
-              <p class="stage-h">Check</p>
-              <div class="check" id="stCheck"></div>
+            <div class="stage-app">
+              <nav class="st-rail" aria-hidden="true">
+                <svg class="st-mark" viewBox="0 0 34 34"><rect x="2" y="21" width="30" height="11" rx="4"/><rect x="2" y="11.5" width="22" height="8.5" rx="3.5"/><rect class="g" x="2" y="2" width="14" height="8.5" rx="3.5"/></svg>
+                <span data-r="0">1</span><span data-r="1">2</span><span data-r="2">3</span><span data-r="3">4</span><span data-r="4">5</span>
+                <span data-r="5" class="gold"><svg class="ic sm"><use href="#i-cap"/></svg></span>
+              </nav>
+              <div class="stage-body">
+                <div class="stage-head"><span class="eyebrow" id="stEyebrow"></span></div>
+                <p class="stage-h">Do it</p>
+                <ol class="steps-l" id="stSteps"></ol>
+                <p class="stage-h">Check</p>
+                <div class="check" id="stCheck"></div>
+              </div>
+              <aside class="st-side" aria-hidden="true">
+                <p class="st-label">Your journey</p>
+                <p class="st-addr"><span class="mono">0x5d1e…a09c</span><span class="st-net" id="stNet">Testnet</span></p>
+                <p class="st-row"><span>Test BOT</span><b class="mono">9.98</b></p>
+                <p class="st-row"><span>Progress</span><b id="stProg">0 / 5</b></p>
+                <p class="st-row"><span>XP</span><b id="stXp" class="st-xp">0</b></p>
+                <div class="st-bar"><i id="stBar"></i></div>
+                <div class="stage-dots" id="stDots"></div>
+              </aside>
             </div>
             <span class="vcursor" id="stCursor"><svg viewBox="0 0 20 20"><path d="M3 2l13 6-5.5 2L8.5 16 3 2z"/></svg></span>
           </div>
