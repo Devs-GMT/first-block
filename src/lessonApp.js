@@ -75,7 +75,12 @@ const SCENES = [
 ];
 
 export function mountLessons({ app, tabs, left }) {
-  const stage = app, steps = $('#stSteps', app), checkEl = $('#stCheck', app), eyebrow = $('#stEyebrow', app), cur = $('#stCursor', app), cap = $('#lCap');
+  const stage = app, steps = $('#stSteps', app), checkEl = $('#stCheck', app), eyebrow = $('#stEyebrow', app), cur = $('#stCursor', app), cap = $('#lCap'), url = $('#stUrl', app), dots = $('#stDots', app);
+  /** Same dots as the journey card: lessons before this one are done, this one is current, graduate is gold. */
+  const drawDots = (i, passedNow) => {
+    const done = i === 5 ? 5 : i + (passedNow ? 1 : 0);
+    dots.innerHTML = [0, 1, 2, 3, 4].map((n) => `<i class="${n < done ? 'done' : n === i ? 'cur' : ''}"></i>`).join('') + `<i class="gold${i === 5 && passedNow ? ' done' : ''}"></i>`;
+  };
   const wide = () => matchMedia('(min-width: 961px)').matches;
   let run = 0, active = -1, visible = false;
 
@@ -122,6 +127,7 @@ export function mountLessons({ app, tabs, left }) {
       passed: async () => {
         await w(500); checkEl.innerHTML = checkHTML('busy'); await w(1200);
         checkEl.innerHTML = checkHTML('ok', SCENES[i].okText);
+        drawDots(i, true);
         await w(5200);
       },
       confetti: () => {
@@ -138,6 +144,8 @@ export function mountLessons({ app, tabs, left }) {
 
   const render = (i) => {
     eyebrow.textContent = COPY[i].eyebrow;
+    url.textContent = `First Block · ${i === 5 ? '/graduate' : `/lesson/${i + 1}`}`;
+    drawDots(i, false);
     cap.textContent = COPY[i].cap;
     steps.innerHTML = SCENES[i].steps.join('');
     checkEl.innerHTML = checkHTML('idle');
@@ -152,6 +160,7 @@ export function mountLessons({ app, tabs, left }) {
     $$(':scope > li', steps).forEach((e) => e.classList.add('ok'));
     $$('.hp-data', steps).forEach((e) => e.classList.add('show'));
     checkEl.innerHTML = checkHTML('ok', SCENES[i].okText);
+    drawDots(i, true);
   };
 
   const play = async (i) => {
