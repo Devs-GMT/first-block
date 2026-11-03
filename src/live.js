@@ -148,7 +148,7 @@ export async function initGraduates() {
     const cards = await Promise.all([...page].reverse().map(async (x, i) => {
       let verified = false;
       if (p) { try { verified = Number((await p.progressOf(x.wallet))[0]) === 5; } catch { /* leave Self-reported */ } }
-      const date = new Date(Number(x.at) * 1000).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+      const date = new Date(Number(x[2]) * 1000).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
       return `<article class="grad-card"><div class="m-row"><code>${short(x.wallet)}</code><span class="chip ${verified ? '' : 'self'}">${verified ? '✓ Verified' : 'Self-reported'}</span></div><q>${x.note ? esc(x.note) : 'No note left.'}</q><span class="muted sm">${date}</span></article>`;
     }));
     holder.className = 'grads grad-row';

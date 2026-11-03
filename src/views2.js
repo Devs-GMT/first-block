@@ -46,10 +46,12 @@ export function graduateView(root) {
     if (st.addr && g()) {
       try {
         const id = Number(await withRetry(() => g().gradId(st.addr)));
-        if (id) { const e = await withRetry(() => g().grads(id - 1)); mine = { id, note: e.note, at: Number(e.at) }; }
+        if (id) { const e = await withRetry(() => g().grads(id - 1)); mine = { id, note: e.note, at: Number(e[2]) }; }
       } catch { /* leave null */ }
     }
     if (alive) draw();
+    // The estimate belongs to this wallet on mainnet, so it runs after every load: arriving there or switching there.
+    if (alive && !mine && st.addr && g() && wallet.chainId === NETWORKS.mainnet.id && st.prog.count === 5) { await estimateGas(); if (alive) draw(); }
   };
 
   const cardHTML = () => `<div class="grad-card-wrap"><canvas id="cardCv" class="card-cv" width="1200" height="630"></canvas>
@@ -76,10 +78,13 @@ export function graduateView(root) {
         <p class="muted sm">${estimate ? `Estimated gas: about ${estimate}.` : 'The gas estimate shows here.'} You'll need a little real BOT. <a class="link-under" href="${LINKS.botchain}" target="_blank" rel="noopener">Get BOT for gas</a></p>
         <button class="pill pill-dark big" data-act="graduate"${busy ? ' disabled' : ''}>Graduate</button><p class="txs" data-s="g"></p></div>`;
     }
+    const typing = document.activeElement?.id === 'gradNote';
     root.innerHTML = `<div class="v-wrap"><p class="eyebrow">Graduation · Mainnet</p><h1 class="v-title">Graduate on BOT Chain mainnet.</h1>
       <p class="muted v-lead">One mainnet transaction records that you finished First Block, with a note if you want to leave one. Mainnet can't read testnet, so the site unlocks this after 5 of 5, and the wall marks you Verified when testnet agrees.</p>
       <div class="g-prog"><span>Lessons passed</span><b>${st.prog.count} / 5</b><div class="pbar"><i style="width:${st.prog.count * 20}%"></i></div></div>
       ${body}</div>`;
+    // A late gas estimate redraws the form; keep the caret where the learner was typing.
+    if (typing) { const f = $('#gradNote', root); f?.focus(); f?.setSelectionRange(f.value.length, f.value.length); }
     if (mine) paintCard();
     else if (!MAINNET_CONTRACT && st.addr) paintPreview();
   };
@@ -136,7 +141,7 @@ export function graduateView(root) {
   root.addEventListener('input', (e) => { if (e.target.id === 'gradNote') note = e.target.value; });
 
   draw();
-  load().then(async () => { if (st.addr && wallet.chainId === NETWORKS.mainnet.id && MAINNET_CONTRACT && !mine && st.prog.count === 5) { await estimateGas(); draw(); } });
+  load();
   const un = onWallet(() => { if (alive && !busy) load(); });
   return () => { alive = false; un(); root.onclick = null; };
 }
@@ -165,7 +170,7 @@ export function wallView(root) {
       const p = progressRead();
       const ids = page.map((_, i) => total - i);
       const verified = await Promise.all(page.map(async (x) => { if (!p) return false; try { return Number((await p.progressOf(x.wallet))[0]) === 5; } catch { return false; } }));
-      draw(`<p class="muted sm">${total.toLocaleString('en-US')} graduate${total === 1 ? '' : 's'}</p><div class="wall-grid">${page.map((x, i) => `<article class="grad-card"><div class="m-row"><code>#${ids[i]} · ${short(x.wallet)}</code><span class="chip ${verified[i] ? '' : 'self'}">${verified[i] ? '✓ Verified' : 'Self-reported'}</span></div><q>${x.note ? esc(x.note) : 'No note left.'}</q><span class="muted sm">${new Date(Number(x.at) * 1000).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</span></article>`).join('')}</div>`);
+      draw(`<p class="muted sm">${total.toLocaleString('en-US')} graduate${total === 1 ? '' : 's'}</p><div class="wall-grid">${page.map((x, i) => `<article class="grad-card"><div class="m-row"><code>#${ids[i]} · ${short(x.wallet)}</code><span class="chip ${verified[i] ? '' : 'self'}">${verified[i] ? '✓ Verified' : 'Self-reported'}</span></div><q>${x.note ? esc(x.note) : 'No note left.'}</q><span class="muted sm">${new Date(Number(x[2]) * 1000).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</span></article>`).join('')}</div>`);
     } catch { draw('<p class="muted">Couldn\'t reach mainnet right now. <button class="link-under" onclick="location.reload()">Retry</button></p>'); }
   })();
   return () => { alive = false; };

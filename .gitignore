@@ -6,3 +6,4 @@ contracts/.env
 contracts/node_modules
 contracts/cache
 contracts/artifacts
+.local-node.log

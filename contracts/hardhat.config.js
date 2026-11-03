@@ -18,6 +18,8 @@ module.exports = {
     },
   },
   networks: {
+    // Local node used to simulate mainnet (HH_CHAIN=677) when end-to-end testing the Graduation flow.
+    hardhat: { chainId: Number(process.env.HH_CHAIN || 31337) },
     botTestnet: { url: "https://rpc.bohr.life", chainId: 968, accounts: testnetAccounts },
   },
 };
