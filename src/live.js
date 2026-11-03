@@ -71,8 +71,8 @@ export function initScan() {
     $('.s-ic', li).innerHTML = state === 'ok' ? icon('check', 'sm') : state === 'na' ? '–' : state === 'err' ? '!' : '<span class="spin"></span>';
     $('.s-v', li).textContent = value ?? '';
   };
-  // The hero's block path shows the checked wallet's progress.
-  const drawBlocks = (done, graduated = false) => document.dispatchEvent(new CustomEvent('fb:blocks', { detail: done == null ? null : graduated && done === 5 ? 6 : done }));
+  // The hero's lesson path shows the checked wallet's progress.
+  const drawBlocks = (addr, state) => document.dispatchEvent(new CustomEvent('fb:blocks', { detail: { addr, state } }));
 
   const check = async (addr) => {
     const tok = ++run;
@@ -82,7 +82,7 @@ export function initScan() {
       <ul class="s-list">${rowHTML('found', 'Wallet address')}${rowHTML('balance', 'Test BOT balance')}${rowHTML('txs', 'Transactions sent')}${rowHTML('done', 'Lessons passed')}${rowHTML('graduate', 'Graduated on mainnet')}</ul>
       <div class="s-foot"></div>`;
     let lastDone = null;
-    drawBlocks(null);
+    drawBlocks(addr, 'reading');
     setRow('found', 'ok', 'Valid');
     let failed = false;
     const res = await scanWallet(addr, (key, val) => {
@@ -90,10 +90,11 @@ export function initScan() {
       if (val === undefined) { failed = true; return setRow(key, 'err', 'Couldn\'t read'); }
       if (key === 'balance') setRow(key, 'ok', `${Number(val).toLocaleString('en-US', { maximumFractionDigits: 4 })} tBOT`);
       if (key === 'txs') setRow(key, 'ok', String(val));
-      if (key === 'done') { if (val === null) setRow(key, 'na', 'Contract not live yet'); else { lastDone = val.count; setRow(key, 'ok', `${val.count} of 5`); drawBlocks(val.count); } }
-      if (key === 'graduate') { if (val === null) setRow(key, 'na', 'Contract not live yet'); else { setRow(key, 'ok', val ? 'Yes' : 'Not yet'); if (val && lastDone === 5) drawBlocks(5, true); } }
+      if (key === 'done') { if (val === null) setRow(key, 'na', 'Contract not live yet'); else { lastDone = val.count; setRow(key, 'ok', `${val.count} of 5`); drawBlocks(addr, val.count); } }
+      if (key === 'graduate') { if (val === null) setRow(key, 'na', 'Contract not live yet'); else { setRow(key, 'ok', val ? 'Yes' : 'Not yet'); if (val && lastDone === 5) drawBlocks(addr, 6); } }
     });
     if (tok !== run) return;
+    if (lastDone === null) drawBlocks(addr, 'failed');
     const foot = $('.s-foot', panel);
     if (failed) foot.innerHTML = '<button class="link-under" data-retry>Retry the failed reads</button>';
     else if (res.done && res.done.count === 5) foot.textContent = 'All five lessons passed. This wallet can graduate on mainnet.';

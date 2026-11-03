@@ -1,5 +1,6 @@
 import './style.css';
 import { MAINNET_CONTRACT, TESTNET_PROGRESS, LINKS } from './config.js';
+import { graduationRead, onWallet, progressRead, short, withRetry } from './chain.js';
 import { mountLessons } from './lessonApp.js';
 import { io, sweepify } from './reveal.js';
 import { initWalletUI, initScan, initWall, initGraduates } from './live.js';
@@ -49,55 +50,80 @@ $$('#sheet a').forEach((a) => a.addEventListener('click', () => { nav.classList.
 $$('[data-sweep]').forEach(sweepify);
 $$('.reveal').forEach((el) => io.observe(el));
 
-/* ---------- Hero: the block path ----------
-   Six cubes climb from lesson 1 to graduation. Before a wallet is checked they demo the path, then they show
-   that wallet's real progress: grey is locked, light green is next, green has passed, amber is graduation. */
-const FACE = { t: '32,5.97 52.95,18.5 32,30.54 11.05,18.5', l: '8.62,21.17 30.79,33.22 30.79,58.27 8.62,45.5', r: '55.38,21.17 55.38,45.5 33.22,58.27 33.22,33.22' };
-const cubeSVG = (cls = '') => `<g class="hb ${cls}"><polygon class="t" points="${FACE.t}"/><polygon class="l" points="${FACE.l}"/><polygon class="r" points="${FACE.r}"/></g>`;
+/* ---------- Hero: a field of blocks ----------
+   The grid fills the hero and fades out behind the copy. Now and then one block "gets mined" and lights up. */
+(() => {
+  const el = $('#heroField');
+  if (!el) return;
+  let w = 0, h = 0, timer = 0, on = true;
+  const build = () => {
+    const cw = el.clientWidth, ch = el.clientHeight;
+    if (!cw || !ch || (cw === w && ch === h)) return;
+    w = cw; h = ch;
+    const small = cw < 900, S = small ? 38 : 58, G = small ? 6 : 8, p = S + G;
+    const cols = Math.ceil(cw / p) + 1, rows = Math.ceil(ch / p) + 1;
+    el.style.setProperty('--s', `${S}px`); el.style.setProperty('--g', `${G}px`);
+    el.style.gridTemplateColumns = `repeat(${cols}, ${S}px)`; el.style.gridAutoRows = `${S}px`;
+    let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+    el.innerHTML = Array.from({ length: cols * rows }, () => { const v = rnd(); return `<i class="fc${v > 0.9 ? ' g2' : v > 0.78 ? ' g1' : ''}"></i>`; }).join('');
+  };
+  const mine = () => {
+    const cells = el.children;
+    if (on && cells.length) { const c = cells[Math.floor(Math.random() * cells.length)]; if (!c.classList.contains('mine')) { c.classList.add('mine'); c.addEventListener('animationend', () => c.classList.remove('mine'), { once: true }); } }
+    timer = setTimeout(mine, 650 + Math.random() * 700);
+  };
+  build();
+  let rz = 0; addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(build, 150); });
+  if (!reduce) { new IntersectionObserver(([e]) => { on = e.isIntersecting; }).observe(el); timer = setTimeout(mine, 1200); }
+})();
+
+/* ---------- Hero: the lesson path ----------
+   With no wallet the blocks run a labelled preview. A connected or pasted wallet replaces it with that wallet's
+   real progress from the contracts, so a learner never mistakes the preview for their own. */
 const heroPath = (() => {
-  const el = $('#heroPath');
-  if (!el) return null;
-  const NAMES = ['Get set up', 'First transaction', 'Talk to a contract', 'Deploy', 'Make it work', 'Graduate'];
-  const X0 = 152, Y0 = 404, DX = 78, DY = -64, S = 1.56;
-  const cubes = NAMES.map((name, i) => {
-    const x = X0 + DX * i, y = Y0 + DY * i;
-    return `<g class="hp ${i === 5 ? 'gold' : ''}" data-i="${i}" transform="translate(${x} ${y})">
-      <g class="hp-drop" style="--d:${120 + i * 90}ms"><g transform="scale(${S})">${cubeSVG()}</g></g>
-      <text class="hl" x="-14" y="54" text-anchor="end"><tspan class="hl-n">${i === 5 ? '★' : String(i + 1).padStart(2, '0')}</tspan> ${name}</text></g>`;
-  }).join('');
-  el.innerHTML = `<svg viewBox="0 0 640 520" aria-hidden="true">
-    <defs><pattern id="isoDots" width="24" height="13.86" patternUnits="userSpaceOnUse"><circle cx="1.5" cy="1.5" r="1.3"/><circle cx="13.5" cy="8.43" r="1.3"/></pattern>
-      <radialGradient id="isoFade" cx="58%" cy="56%" r="46%"><stop offset="0" stop-color="#fff"/><stop offset=".55" stop-color="#fff" stop-opacity=".7"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
-      <mask id="isoMask"><rect width="640" height="520" fill="url(#isoFade)"/></mask></defs>
-    <rect class="iso-grid" width="640" height="520" fill="url(#isoDots)" mask="url(#isoMask)"/>
-    <path class="hp-link" d="M${X0 + 50} ${Y0 + 47} ${Array.from({ length: 5 }, (_, i) => `L${X0 + 50 + DX * (i + 1)} ${Y0 + 47 + DY * (i + 1)}`).join(' ')}"/>
-    ${cubes}</svg>`;
-  const groups = $$('.hp', el);
-  let shown = -1;
-  const set = (done, { animate = true } = {}) => {
-    groups.forEach((g, i) => {
-      const was = g.classList.contains('done');
-      const now = i < 5 ? i < done : done >= 6;
-      g.classList.toggle('done', now);
-      g.classList.toggle('cur', !now && i === Math.min(done, 5) && done < 6);
-      if (animate && now && !was) { const c = $('.hp-drop', g); c.classList.remove('click'); void c.getBoundingClientRect(); c.classList.add('click'); }
+  const row = $('#heroChain'), cap = $('#heroCap');
+  if (!row) return null;
+  const tiles = $$('.hc', row);
+  const PREVIEW = '<span class="hc-tag">Preview</span>Five blocks on BOT Chain Testnet, then one on Mainnet.';
+  let shown = -1, timer = 0, source = null;
+  const set = (done, animate = true) => {
+    tiles.forEach((t, i) => {
+      const was = t.classList.contains('done'), now = i < done;
+      t.classList.toggle('done', now);
+      t.classList.toggle('next', i === done);
+      if (animate && now && !was) { t.classList.remove('click'); void t.offsetWidth; t.classList.add('click'); }
     });
     shown = done;
   };
-  set(0, { animate: false });
-  let timer = 0, demo = !reduce;
-  const step = () => { if (!demo) return; const next = shown >= 6 ? 0 : shown + 1; set(next); timer = setTimeout(step, next === 6 ? 3200 : next === 0 ? 900 : 1300); };
-  if (reduce) set(3, { animate: false });
-  else {
-    el.classList.add('in');
-    new IntersectionObserver(([e]) => { clearTimeout(timer); if (e.isIntersecting && demo) timer = setTimeout(step, 1600); }, { threshold: 0.3 }).observe(el);
-  }
-  return {
-    // A checked wallet replaces the demo with its real progress (null while the chain is being read).
-    show(done) { demo = false; clearTimeout(timer); el.classList.add('real'); set(done == null ? 0 : done, { animate: done != null }); groups.forEach((g) => g.classList.toggle('wait', done == null)); },
+  const step = () => { if (source) return; const n = shown >= 6 ? 0 : shown + 1; set(n); timer = setTimeout(step, n === 6 ? 3200 : n === 0 ? 900 : 1300); };
+  const preview = () => { source = null; cap.innerHTML = PREVIEW; row.classList.remove('wait'); set(reduce ? 2 : 0, false); clearTimeout(timer); if (!reduce) timer = setTimeout(step, 1700); };
+  // state: 'reading', 'failed' or the number of blocks done (6 once graduated).
+  const show = (addr, state, from) => {
+    source = from; clearTimeout(timer);
+    row.classList.toggle('wait', state === 'reading');
+    const who = `<code>${short(addr)}</code>`;
+    if (state === 'reading') { set(0, false); tiles[0].classList.remove('next'); cap.innerHTML = `${who}<span class="spin"></span>Reading the chain…`; return; }
+    if (state === 'failed') { set(0, false); tiles[0].classList.remove('next'); cap.innerHTML = `${who}Couldn't read this wallet's progress. The testnet RPC may be busy.`; return; }
+    set(state);
+    cap.innerHTML = `${who}${state === 6 ? 'Passed 5 of 5 and graduated on mainnet.' : state === 5 ? 'Passed 5 of 5. Ready to graduate.' : `Passed ${state} of 5. Lesson ${state + 1} is next.`}`;
   };
+  preview();
+  let run = 0;
+  onWallet(async (w) => {
+    if (source === 'checked') return;
+    const tok = ++run;
+    if (!w.address) { if (source !== null) preview(); return; }
+    show(w.address, 'reading', 'wallet');
+    try {
+      const [done] = await withRetry(() => progressRead().progressOf(w.address));
+      let n = Number(done);
+      if (n === 5) { try { if (await withRetry(() => graduationRead().isGraduate(w.address))) n = 6; } catch { /* stays at 5 */ } }
+      if (tok === run && source === 'wallet') show(w.address, n, 'wallet');
+    } catch { if (tok === run && source === 'wallet') show(w.address, 'failed', 'wallet'); }
+  });
+  return { checked: ({ addr, state }) => { run++; show(addr, state, 'checked'); } };
 })();
-document.addEventListener('fb:blocks', (e) => heroPath?.show(e.detail));
+document.addEventListener('fb:blocks', (e) => heroPath?.checked(e.detail));
 
 /* ---------- Footer: on phones each link column folds into an accordion ---------- */
 (() => {
@@ -112,21 +138,6 @@ document.addEventListener('fb:blocks', (e) => heroPath?.show(e.detail));
     const sync = () => { const open = !narrow.matches || col.classList.contains('open'); btn.setAttribute('aria-expanded', open); btn.disabled = !narrow.matches; };
     btn.addEventListener('click', () => { col.classList.toggle('open'); sync(); });
     narrow.addEventListener('change', sync); sync();
-  });
-})();
-
-/* ---------- Who it's for: small block scenes, one per audience ---------- */
-(() => {
-  const P = { 0: [[0, 0, 0], [1.15, 0, 0]], 1: [[0, 0, 0], [0, 0, 1], [0, 0, 2]], 2: [[0, 0, 0], [1, 0, 0], [0, 1, 0], [1, 1, 0]], 3: [[0, 0, 0], [1, 0, 0], [0.5, 0.5, 1]], 4: [[-1.1, 0, 0], [0, -1.1, 0], [1.1, 0, 0], [0, 1.1, 0], [0, 0, 0]] };
-  $$('#who .who').forEach((card, k) => {
-    const cells = (P[k] || P[0]).map(([gx, gy, gz]) => ({ x: (gx - gy) * 25, y: (gx + gy) * 14.4 - gz * 29, z: gx + gy + gz * 0.01 }))
-      .sort((a, b) => a.z - b.z || b.y - a.y);
-    const svg = cells.map((c, i) => `<g transform="translate(${c.x} ${c.y}) scale(.8)">${cubeSVG(i === cells.length - 1 ? 'done' : 'ink')}</g>`).join('');
-    const art = document.createElement('div');
-    art.className = 'who-art'; art.setAttribute('aria-hidden', 'true');
-    art.innerHTML = `<svg viewBox="-70 -60 190 150">${svg}</svg>`;
-    $('.ic.lg', card)?.remove();
-    card.insertBefore(art, $('h3', card));
   });
 })();
 

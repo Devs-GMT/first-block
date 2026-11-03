@@ -144,7 +144,7 @@ Lessons 2 to 5 revert until the lesson before them has passed.
 | `/wall` | Every graduate, with Verified or Self-reported |
 | `/privacy`, `/terms` | What stays in your browser, what goes on chain, and the terms of this community project |
 
-The hero's block path is six cubes, one per lesson plus graduation. Paste a wallet into the hero and they show that wallet's real progress, read from the Progress contract: grey is locked, light green is next, green has passed.
+The hero is a field of blocks with the six lesson blocks lit up in it, one per lesson plus graduation. Without a wallet they run a labelled preview. Connect a wallet or paste one into the hero and they show that wallet's real progress, read from the Progress contract: pale is locked, outlined is next, green has passed.
 
 ## Contracts
 
