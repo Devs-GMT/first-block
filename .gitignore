@@ -1,9 +1,30 @@
+# Dependencies and build output
 node_modules
 dist
-.env
-contracts/.env
-.local/
-contracts/node_modules
 contracts/cache
 contracts/artifacts
-.local-node.log
+contracts/coverage
+coverage
+
+# Secrets: never commit these
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+learner*.json
+
+# Local-only work: X kit, images, drafts and scripts
+.local/
+*.log
+
+# Editor and tool settings
+.claude/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Working notes and source files the site doesn't use
+docs/design-spec.md
+public/logo-wallet.png
