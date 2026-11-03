@@ -10,7 +10,7 @@ export const io = new IntersectionObserver((entries) => {
 }, { threshold: 0.2 });
 
 /** Splits a heading into per-character spans so it can sweep in colour when it enters the viewport. */
-export function sweepify(el) {
+export function sweepify(el, { manual = false } = {}) {
   const text = el.textContent;
   el.setAttribute('aria-label', text);
   el.textContent = '';
@@ -31,5 +31,9 @@ export function sweepify(el) {
     if (wi < arr.length - 1) el.append(' ');
     i++;
   });
-  io.observe(el);
+  // Manual titles sweep when their owner says so (for example when a lesson block becomes active).
+  if (!manual) io.observe(el);
 }
+
+/** Runs the colour sweep on a title made with sweepify. */
+export const sweepNow = (el) => el.querySelectorAll('.sweep-c').forEach((c) => c.classList.add('go'));

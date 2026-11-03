@@ -1,4 +1,4 @@
-import { sweepify } from './reveal.js';
+import { sweepify, sweepNow } from './reveal.js';
 
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -96,7 +96,8 @@ export function mountLessons({ app, tabs, left }) {
   const blocks = $$('.l-block', left);
   // Faded blocks are clickable shortcuts to their lesson, like the reference's inactive features.
   blocks.forEach((b, i) => b.addEventListener('click', () => { if (!b.classList.contains('active')) goTo(i); }));
-  $$('h3[data-sweep]', left).forEach(sweepify);
+  // Block titles sweep when the block becomes active, not when they first scroll into view.
+  $$('h3[data-sweep]', left).forEach((h) => sweepify(h, { manual: true }));
 
   const checkHTML = (state, text) => {
     if (state === 'busy') return '<p class="chk busy"><span class="spin"></span>Checking the chain…</p>';
@@ -188,6 +189,8 @@ export function mountLessons({ app, tabs, left }) {
     } catch (_) { /* cancelled */ }
   };
 
+  const sweepActive = () => { const t = active >= 0 && $('h3[data-sweep]', blocks[active]); if (t) sweepNow(t); };
+
   const setScene = (i) => {
     if (i === active) return;
     active = i;
@@ -196,6 +199,7 @@ export function mountLessons({ app, tabs, left }) {
     const bar = tabs[i].parentElement;
     if (!wide() && bar.scrollWidth > bar.clientWidth) bar.scrollTo({ left: tabs[i].offsetLeft - (bar.clientWidth - tabs[i].offsetWidth) / 2, behavior: reduce ? 'auto' : 'smooth' });
     blocks.forEach((b, n) => b.classList.toggle('active', n === i));
+    if (visible) sweepActive();
     if (visible) play(i); else (reduce ? renderFinal(i) : render(i));
   };
 
@@ -215,7 +219,7 @@ export function mountLessons({ app, tabs, left }) {
 
   new IntersectionObserver(([e]) => {
     visible = e.isIntersecting;
-    if (visible) play(active < 0 ? 0 : active); else run++;
+    if (visible) { play(active < 0 ? 0 : active); sweepActive(); } else run++;
   }, { threshold: 0.3 }).observe(app);
 
   setScene(0);
