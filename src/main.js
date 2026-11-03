@@ -87,22 +87,26 @@ $$('.reveal').forEach((el) => io.observe(el));
   new IntersectionObserver(([e]) => { on = e.isIntersecting; cancelAnimationFrame(raf); if (on && !reduce) raf = requestAnimationFrame(loop); }).observe(cv);
 })();
 
-/* ---------- Hero: animated "Your journey" card ---------- */
+/* ---------- Hero: animated "Your path" window ---------- */
 (() => {
   const card = $('#jcard');
   if (!card) return;
-  const blocks = $$('.jc-b', card), bar = $('#jcBar'), num = $('#jcNum'), line = $('#jcLine');
-  const MSG = ['Wallet has gas. Lesson 1 passed.', 'Transaction recorded. Lesson 2 passed.', 'Hello written to the chain. Lesson 3 passed.', 'Counter deployed and owned by you. Lesson 4 passed.', 'Count reached 3. Lesson 5 passed.', '5 of 5. Ready to graduate on mainnet.'];
+  const nodes = $$('.jn', card), num = $('#jcNum'), line = $('#jcLine'), xp = $('#jcXp');
+  const MSG = ['Wallet has gas. Lesson 1 passed.', 'Transaction recorded. Lesson 2 passed.', 'Hello written to the chain. Lesson 3 passed.', 'Counter deployed and owned by you. Lesson 4 passed.', 'Count reached 3. Lesson 5 passed.', 'Graduated on BOT Chain mainnet.'];
   const set = (d) => {
-    blocks.forEach((b, i) => { b.classList.toggle('done', i < d); b.classList.toggle('cur', i === d && i < 5); });
-    bar.style.width = `${Math.min(d, 5) * 20}%`;
-    num.textContent = `${Math.min(d, 5)} / 5`;
+    nodes.forEach((n, i) => {
+      n.classList.toggle('done', i < d);
+      n.classList.toggle('cur', i === d);
+      $('.jn-dot', n).innerHTML = i < d ? icon('check', 'sm') : i === 5 ? icon('cap', 'sm') : String(i + 1);
+    });
+    num.textContent = d >= 6 ? 'Graduated' : `${Math.min(d, 5)} of 5`;
     line.innerHTML = d ? `${icon('check', 'sm')}${MSG[d - 1]}` : 'Each block unlocks the next.';
+    xp.classList.remove('on'); if (d && d < 6) { void xp.offsetWidth; xp.classList.add('on'); }
   };
   set(0);
   if (reduce) { set(3); return; }
   let t = 0, d = 0;
-  const tick = () => { d = d > 6 ? 0 : d; set(d); d++; t = setTimeout(tick, d === 7 ? 3200 : 1250); };
+  const tick = () => { if (d > 6) d = 0; set(d); d++; t = setTimeout(tick, d === 7 ? 3400 : 1500); };
   new IntersectionObserver(([e]) => { clearTimeout(t); if (e.isIntersecting) tick(); }, { threshold: 0.3 }).observe(card);
 })();
 
@@ -221,10 +225,11 @@ route();
 
 /* ---------- Footer config ---------- */
 if (MAINNET_CONTRACT) {
-  $('#addrText').textContent = `chain ID 677 · ${MAINNET_CONTRACT.slice(0, 6)}…${MAINNET_CONTRACT.slice(-4)}`;
+  $('#addrText').textContent = `${MAINNET_CONTRACT.slice(0, 6)}…${MAINNET_CONTRACT.slice(-4)}`;
   $('#explorerBtn').href = `${LINKS.mainnetExplorer}/address/${MAINNET_CONTRACT}`;
   $('#copyAddr').addEventListener('click', () => navigator.clipboard?.writeText(MAINNET_CONTRACT));
 } else {
   $('#copyAddr').disabled = true;
+  $('#copyAddr .ic').style.display = 'none';
   $('#copyAddr').style.cursor = 'default';
 }

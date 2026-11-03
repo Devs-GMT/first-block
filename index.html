@@ -36,6 +36,7 @@
     <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="9" r="3"/><path d="M3 20c0-3 3-5 6-5s6 2 6 5M16 6a3 3 0 010 6M18 15c2 .5 3 2.4 3 5"/></symbol>
     <symbol id="i-code" viewBox="0 0 24 24"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></symbol>
     <symbol id="i-pen" viewBox="0 0 24 24"><path d="M4 20l1-4L16 5l3 3L8 19l-4 1zM14 7l3 3"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 012-2h9"/></symbol>
     <symbol id="i-up" viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6"/></symbol>
     <symbol id="i-flag" viewBox="0 0 24 24"><path d="M5 21V4M5 5h12l-2 4 2 4H5"/></symbol>
   </defs>
@@ -119,17 +120,12 @@
   </div>
 
   <div class="jcard fade fade-wheel" id="jcard" role="img" aria-label="Animated preview of your progress through the five lessons">
-    <div class="jc-head"><p class="eyebrow">Your journey</p><b class="jc-num" id="jcNum">0 / 5</b></div>
-    <div class="jc-chain">
-      <div class="jc-b"><span class="jc-sq">1</span><span class="jc-t">Get set up</span></div>
-      <div class="jc-b"><span class="jc-sq">2</span><span class="jc-t">First transaction</span></div>
-      <div class="jc-b"><span class="jc-sq">3</span><span class="jc-t">Talk to a contract</span></div>
-      <div class="jc-b"><span class="jc-sq">4</span><span class="jc-t">Deploy</span></div>
-      <div class="jc-b"><span class="jc-sq">5</span><span class="jc-t">Make it work</span></div>
-      <div class="jc-b gold"><span class="jc-sq"><svg class="ic"><use href="#i-cap"/></svg></span><span class="jc-t">Graduate</span></div>
+    <div class="stage-bar" aria-hidden="true"><i></i><i></i><i></i><span>First Block · /learn</span></div>
+    <div class="jc-body">
+      <div class="jc-head"><div><p class="jc-title">Your path</p><p class="jc-sub">Five blocks on testnet, then graduate on mainnet.</p></div><span class="jc-count" id="jcNum">0 of 5</span></div>
+      <ol class="jc-chain" id="jcChain"><li class="jn" data-n="0"><span class="jn-dot">1</span><span class="jn-t">Get set up</span></li><li class="jn" data-n="1"><span class="jn-dot">2</span><span class="jn-t">First transaction</span></li><li class="jn" data-n="2"><span class="jn-dot">3</span><span class="jn-t">Talk to a contract</span></li><li class="jn" data-n="3"><span class="jn-dot">4</span><span class="jn-t">Deploy</span></li><li class="jn" data-n="4"><span class="jn-dot">5</span><span class="jn-t">Make it work</span></li><li class="jn gold" data-n="5"><span class="jn-dot"><svg class="ic sm"><use href="#i-cap"/></svg></span><span class="jn-t">Graduate</span></li></ol>
+      <div class="jc-foot"><p class="jc-line" id="jcLine">Each block unlocks the next.</p><span class="xp-pill jc-xp" id="jcXp">+150 XP</span></div>
     </div>
-    <div class="pbar"><i id="jcBar" style="width:0"></i></div>
-    <p class="jc-line" id="jcLine">Each block unlocks the next.</p>
   </div>
   <p class="caption">A preview of your path. Once you connect, your real progress is read from the chain.</p>
 </section>
@@ -338,18 +334,27 @@
   <div class="wrap">
     <div class="foot-line" aria-hidden="true"></div>
     <div class="foot-card">
-      <span class="foot-badge"><svg class="ic sm"><use href="#i-check"/></svg></span>
-      <p class="eyebrow">Lesson ∞</p>
-      <h2 class="foot-h">Keep building on BOT Chain</h2>
-      <div class="foot-row">
-        <a class="foot-chain" href="https://botchain.ai" target="_blank" rel="noopener"><img class="foot-logo" src="/logo-white-botchain.svg" alt="BOT Chain" height="22" /></a>
-        <button class="mono-copy" id="copyAddr" aria-label="Copy contract address"><span id="addrText">chain ID 677 · not deployed yet</span></button>
-        <a class="pill pill-dark" id="explorerBtn" href="https://scan.botchain.ai" target="_blank" rel="noopener">View on explorer <svg class="ic xs"><use href="#i-arrow"/></svg></a>
-        <span class="chip" id="gradPill">0 graduates</span>
+      <span class="foot-badge" aria-hidden="true"><svg class="ic sm"><use href="#i-check"/></svg></span>
+      <div class="fc-main">
+        <p class="fc-eyebrow">Lesson ∞</p>
+        <h2 class="foot-h">Keep building on BOT&nbsp;Chain</h2>
+        <p class="fc-sub">Five blocks were the warm-up. Your own dApp is next, and the docs, the faucet and the explorer are all you need.</p>
+        <div class="fc-btns">
+          <a class="pill fc-light" id="explorerBtn" href="https://scan.botchain.ai" target="_blank" rel="noopener">View on explorer <svg class="ic xs"><use href="#i-arrow"/></svg></a>
+          <a class="pill fc-ghost" href="https://dev-docs.botchain.ai/docs/intro" target="_blank" rel="noopener">Read the docs</a>
+        </div>
+      </div>
+      <div class="fc-side">
+        <a class="foot-chain" href="https://botchain.ai" target="_blank" rel="noopener" aria-label="BOT Chain"><img class="foot-logo" src="/logo-white-botchain.svg" alt="BOT Chain" height="22" /></a>
+        <dl class="fc-meta">
+          <div><dt>Network</dt><dd>BOT Chain mainnet · chain ID 677</dd></div>
+          <div><dt>Graduation contract</dt><dd><button class="fc-copy" id="copyAddr" aria-label="Copy contract address"><span id="addrText" class="mono">Not deployed yet</span><svg class="ic xs"><use href="#i-copy"/></svg></button></dd></div>
+          <div><dt>Graduates</dt><dd id="gradPill">0 graduates</dd></div>
+        </dl>
       </div>
     </div>
     <div class="foot-cols">
-      <div><p class="mono-label">Lessons</p><a href="/lesson/1">1 Get set up</a><a href="/lesson/2">2 First transaction</a><a href="/lesson/3">3 Talk to a contract</a><a href="/lesson/4">4 Deploy</a><a href="/lesson/5">5 Make it work</a><a href="#lessons">Graduate</a></div>
+      <div><p class="mono-label">Lessons</p><a href="/lesson/1">1 Get set up</a><a href="/lesson/2">2 First transaction</a><a href="/lesson/3">3 Talk to a contract</a><a href="/lesson/4">4 Deploy</a><a href="/lesson/5">5 Make it work</a><a href="/graduate">Graduate</a></div>
       <div><p class="mono-label">Resources</p><a href="https://dev-docs.botchain.ai/docs/intro" target="_blank" rel="noopener">BOT Chain docs</a><a href="https://faucet.botchain.ai/basic" target="_blank" rel="noopener">Faucet</a><a href="https://scan.bohr.life" target="_blank" rel="noopener">Testnet explorer</a><a href="https://github.com/Devs-GMT/BOTGuide" target="_blank" rel="noopener">BOTGuide</a></div>
       <div><p class="mono-label">Project</p><a href="#top">About</a><a href="https://github.com/Devs-GMT/first-block" target="_blank" rel="noopener">GitHub</a><a href="https://github.com/Devs-GMT/first-block/tree/main/contracts" target="_blank" rel="noopener">Contracts</a></div>
     </div>
