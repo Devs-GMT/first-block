@@ -140,7 +140,7 @@
       <li class="p-card reveal"><span class="p-n">01</span><div><h3>Setting up a wallet and network</h3><p>Install MetaMask, add BOT Chain, get free test BOT.</p></div><span class="chip"><svg class="ic xs"><use href="#i-check"/></svg>Lesson 1</span></li>
       <li class="p-card reveal"><span class="p-n">02</span><div><h3>Understanding transactions and gas</h3><p>Send one, then read your own hash, block and gas.</p></div><span class="chip"><svg class="ic xs"><use href="#i-check"/></svg>Lessons 2 and 3</span></li>
       <li class="p-card reveal"><span class="p-n">03</span><div><h3>Deploying a contract</h3><p>Deploy your own Counter and make it count.</p></div><span class="chip"><svg class="ic xs"><use href="#i-check"/></svg>Lessons 4 and 5</span></li>
-      <li class="p-card fun reveal"><span class="p-n"><svg class="ic"><use href="#i-heart"/></svg></span><div><h3>The fun part: building</h3><p>What you came for, and what's left once the three above are done.</p></div><span class="chip dark">You, after graduating</span></li>
+      <li class="p-card fun reveal"><span class="p-n">04</span><div><h3>The fun part: building</h3><p>What you came for, and what's left once the three above are done.</p></div><span class="chip dark">You, after graduating</span><span class="fun-chain" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i class="g"></i></span></li>
     </ol>
   </div>
 </section>
@@ -359,14 +359,16 @@
 
 <!-- Floating helper -->
 <div class="helper" id="helper">
-  <div class="helper-panel" id="helperPanel" hidden>
-    <p class="helper-title">Stuck?</p>
-    <p class="muted sm">Pick the closest one.</p>
-    <div class="helper-q" id="helperQ"></div>
-    <p class="helper-a" id="helperA" hidden></p>
-    <a class="pill pill-soft sm" href="https://bot-guide.space/" target="_blank" rel="noopener">Ask BOTGuide <svg class="ic xs"><use href="#i-arrow"/></svg></a>
+  <div class="helper-panel" id="helperPanel" role="dialog" aria-label="Help" hidden>
+    <div class="hp-head"><span class="hp-av"><svg viewBox="0 0 34 34"><rect x="2" y="21" width="30" height="11" rx="4"/><rect x="2" y="11.5" width="22" height="8.5" rx="3.5"/><rect x="2" y="2" width="14" height="8.5" rx="3.5"/></svg></span><div><p class="helper-title">Stuck?</p><p class="hp-sub"><i class="live-dot"></i>Quick fixes for the usual snags</p></div><button class="hp-x" id="helperX" aria-label="Close help"><svg class="ic sm"><use href="#i-x"/></svg></button></div>
+    <div class="hp-body">
+      <p class="hp-bubble">Hi! Pick the closest one and I'll tell you what usually fixes it.</p>
+      <div class="helper-q" id="helperQ"></div>
+      <p class="helper-a" id="helperA" hidden></p>
+    </div>
+    <div class="hp-foot"><a class="pill pill-dark sm" href="https://bot-guide.space/" target="_blank" rel="noopener">Ask BOTGuide <svg class="ic xs"><use href="#i-arrow"/></svg></a><span class="hp-note">Answers from a fixed list</span></div>
   </div>
-  <button class="helper-bubble" id="helperBtn" aria-expanded="false">Stuck? <span aria-hidden="true">👋</span></button>
+  <button class="helper-bubble" id="helperBtn" aria-expanded="false"><span class="hb-av"><svg viewBox="0 0 34 34"><rect x="2" y="21" width="30" height="11" rx="4"/><rect x="2" y="11.5" width="22" height="8.5" rx="3.5"/><rect x="2" y="2" width="14" height="8.5" rx="3.5"/></svg></span><span>Stuck?</span><span class="hb-wave" aria-hidden="true">👋</span></button>
 </div>
 
 <script type="module" src="/src/main.js"></script>

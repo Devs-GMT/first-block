@@ -185,8 +185,11 @@ const HELP = [
   ['Transaction failed', 'Make sure you\'re on testnet and have some test BOT for gas. If MetaMask says the transaction was rejected, press the button again and confirm.'],
 ];
 const hb = $('#helperBtn'), hp = $('#helperPanel'), ha = $('#helperA');
-$('#helperQ').innerHTML = HELP.map(([q], i) => `<button data-i="${i}">${q}</button>`).join('');
-hb.addEventListener('click', () => { hp.hidden = !hp.hidden; hb.setAttribute('aria-expanded', !hp.hidden); });
+$('#helperQ').innerHTML = HELP.map(([q], i) => `<button data-i="${i}"><span>${q}</span>${icon('chev', 'xs')}</button>`).join('');
+const toggleHelp = (open) => { hp.hidden = !open; hb.setAttribute('aria-expanded', open); hb.classList.toggle('open', open); };
+hb.addEventListener('click', () => toggleHelp(hp.hidden));
+$('#helperX').addEventListener('click', () => toggleHelp(false));
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !hp.hidden) toggleHelp(false); });
 $$('#helperQ button').forEach((b) => b.addEventListener('click', () => {
   $$('#helperQ button').forEach((x) => x.classList.toggle('on', x === b));
   ha.textContent = HELP[+b.dataset.i][1]; ha.hidden = false;
