@@ -52,8 +52,7 @@ button { cursor: pointer; background: none; border: 0; }
 .nav { position: sticky; top: 0; z-index: 70; background: var(--bg); }
 .nav-inner { display: flex; align-items: center; gap: 24px; height: 61px; padding: 0 64px; max-width: 1440px; margin: 0 auto; }
 .brand { display: inline-flex; align-items: center; gap: 8px; font-weight: 500; font-size: 17px; letter-spacing: -0.02em; }
-.brand-mark { width: 24px; height: 24px; fill: var(--ink); }
-.brand-mark .g { fill: var(--green); }
+.brand-mark { width: 26px; height: 26px; }
 .nav-links { display: flex; gap: 2px; margin-left: 12px; }
 .nav-btn { display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; border-radius: 9999px; font-size: 14px; font-weight: 500; transition: background-color .15s var(--ease); }
 .nav-btn:hover, .dd.open > .nav-btn { background: var(--soft); }
@@ -723,8 +722,7 @@ h1, h2, h3 { text-wrap: balance; }
 .stage-bar span { background: var(--a-fill); color: var(--a-muted); }
 .stage-app { display: grid; grid-template-columns: 56px minmax(0, 1fr) 190px; min-height: 470px; }
 .st-rail { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 16px 0; border-right: 1px solid var(--a-line); background: var(--a-fill-2); }
-.st-mark { width: 20px; height: 20px; fill: var(--a-ink); margin-bottom: 10px; }
-.st-mark .g { fill: var(--green); }
+.st-mark { width: 22px; height: 22px; --mk-ink: var(--a-ink); margin-bottom: 10px; }
 .st-rail span { width: 32px; height: 32px; border-radius: 10px; display: grid; place-items: center; font-size: 12px; font-weight: 500; color: var(--a-muted); background: #fff; box-shadow: inset 0 0 0 1px var(--a-line); transition: background-color .35s var(--ease), color .35s var(--ease), box-shadow .35s var(--ease); }
 .st-rail span.cur { color: var(--a-ink); box-shadow: inset 0 0 0 1.5px var(--a-ink); }
 .st-rail span.done { background: var(--green); color: #fff; box-shadow: none; }
@@ -1058,8 +1056,7 @@ h1, h2, h3 { text-wrap: balance; }
 .helper-bubble { display: inline-flex; align-items: center; gap: 10px; height: 48px; padding: 0 18px 0 7px; border-radius: 9999px; background: #fff; color: var(--ink); font-size: 14.5px; font-weight: 600; box-shadow: 0 0 0 1px rgba(30,29,28,.06), 0 10px 30px -8px rgba(30,29,28,.28); transition: transform .2s var(--out), box-shadow .2s var(--ease); }
 .helper-bubble:hover { transform: translateY(-2px); box-shadow: 0 0 0 1px rgba(30,29,28,.08), 0 16px 36px -10px rgba(30,29,28,.32); }
 .hb-av, .hp-av { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: var(--ink); flex: none; }
-.hb-av svg, .hp-av svg { width: 17px; height: 17px; fill: #fff; }
-.hb-av svg rect:last-child, .hp-av svg rect:last-child { fill: var(--green); }
+.hb-av svg, .hp-av svg { width: 21px; height: 21px; --mk-ink: #fff; --mk-mid: #c9c7c1; }
 .hb-wave { display: inline-block; transform-origin: 70% 70%; animation: wave 2.6s ease-in-out 1.5s 2; }
 @keyframes wave { 0%, 60%, 100% { transform: rotate(0); } 10%, 30% { transform: rotate(14deg); } 20%, 40% { transform: rotate(-8deg); } }
 .helper-bubble.open .hb-wave { display: none; }

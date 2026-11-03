@@ -13,9 +13,9 @@ export function drawCard(canvas, { name, wallet: w, date, id, verified }) {
   c.fillStyle = '#f7f6f3'; c.fillRect(0, 0, W, H);
   c.fillStyle = '#ffffff'; roundRect(c, 40, 40, W - 80, H - 80, 36); c.fill();
   c.lineWidth = 4; c.strokeStyle = '#f5b83d'; roundRect(c, 40, 40, W - 80, H - 80, 36); c.stroke();
-  // logo mark: three stacked blocks
-  c.fillStyle = '#1e1d1c'; roundRect(c, 96, 120, 60, 22, 8); c.fill(); roundRect(c, 96, 96, 44, 18, 7); c.fill();
-  c.fillStyle = '#1fa971'; roundRect(c, 96, 72, 28, 18, 7); c.fill();
+  // logo mark: one cube with a green top
+  const face = (pts, col) => { c.fillStyle = c.strokeStyle = col; c.lineWidth = 1.6; c.lineJoin = 'round'; c.beginPath(); pts.split(' ').forEach((p, i) => { const [x, y] = p.split(',').map((n) => n * 1.1); c[i ? 'lineTo' : 'moveTo'](92 + x, 66 + y); }); c.closePath(); c.fill(); c.stroke(); };
+  face('32,5.97 52.95,18.5 32,30.54 11.05,18.5', '#1fa971'); face('8.62,21.17 30.79,33.22 30.79,58.27 8.62,45.5', '#1e1d1c'); face('55.38,21.17 55.38,45.5 33.22,58.27 33.22,33.22', '#4b4945');
   c.fillStyle = '#1e1d1c'; c.font = '600 30px Inter, system-ui, sans-serif'; c.fillText('First Block', 176, 124);
   c.fillStyle = '#78756f'; c.font = '500 24px Inter, system-ui, sans-serif'; c.fillText('Graduate', 96, 230);
   c.fillStyle = '#1e1d1c'; c.font = '500 76px Inter, system-ui, sans-serif';
