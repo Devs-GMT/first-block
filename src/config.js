@@ -11,6 +11,6 @@ export const LINKS = {
   faucet: 'https://faucet.botchain.ai/basic',
   testnetExplorer: 'https://scan.bohr.life',
   mainnetExplorer: 'https://scan.botchain.ai',
-  botguide: 'https://github.com/Devs-GMT/BOTGuide',
+  botguide: 'https://bot-guide.space/',
   github: 'https://github.com/Devs-GMT/first-block',
 };
