@@ -94,6 +94,8 @@ export function mountLessons({ app, tabs, left }) {
 
   left.innerHTML = COPY.map((L, i) => `<div class="l-block" data-i="${i}"><div class="col-text"><p class="eyebrow">${L.eyebrow}</p><h3 data-sweep>${L.title}</h3><p class="muted">${L.body}</p><div class="lrows"><div class="lrow">${icon('send')}<div><b>${L.do[0]}</b><span>${L.do[1]}</span></div></div><div class="lrow">${icon('doc')}<div><b>${L.learn[0]}</b><span>${L.learn[1]}</span></div></div></div></div></div>`).join('');
   const blocks = $$('.l-block', left);
+  // Faded blocks are clickable shortcuts to their lesson, like the reference's inactive features.
+  blocks.forEach((b, i) => b.addEventListener('click', () => { if (!b.classList.contains('active')) goTo(i); }));
   $$('h3[data-sweep]', left).forEach(sweepify);
 
   const checkHTML = (state, text) => {

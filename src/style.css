@@ -951,3 +951,12 @@ h1, h2, h3 { text-wrap: balance; }
 .t-v .tile-f .ic { background: #f1edfd; color: #6d4fd6; }
 .t-a .tile-f .ic { background: #fdf3e1; color: #b07a12; }
 .tiles-hint { text-align: left; margin-top: 14px; padding: 0; }
+
+/* inactive lesson blocks fade like the reference; hover lifts them a little, click jumps there */
+@media (min-width: 961px) {
+  .l-block > .col-text { opacity: .22; transition: opacity .5s var(--ease); }
+  .l-block.active > .col-text { opacity: 1; }
+  .l-block:not(.active) { cursor: pointer; }
+  .l-block:not(.active):hover > .col-text { opacity: .5; }
+}
+@media (prefers-reduced-motion: reduce) { .l-block > .col-text { transition: none; } }
