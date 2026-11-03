@@ -26,6 +26,17 @@ $$('.dd').forEach((dd) => {
   }));
 });
 document.addEventListener('click', (e) => { if (!e.target.closest('.dd')) $$('.dd.open').forEach((d) => d.classList.remove('open')); });
+// Lessons mega menu: hovering or focusing an item shows its animated preview (restarted each time).
+$$('.mega').forEach((m) => {
+  const items = $$('.mega-list a', m), prevs = $$('.mp', m);
+  const show = (i) => {
+    items.forEach((x, n) => x.classList.toggle('on', n === i));
+    prevs.forEach((p, n) => { p.classList.remove('on'); if (n === i) { void p.offsetWidth; p.classList.add('on'); } });
+  };
+  items.forEach((x, i) => { x.addEventListener('mouseenter', () => show(i)); x.addEventListener('focus', () => show(i)); });
+  m.closest('.dd').addEventListener('mouseenter', () => show(0));
+  m.closest('.dd').querySelector('.nav-btn').addEventListener('click', () => show(0));
+});
 const burger = $('#burger');
 burger.addEventListener('click', () => {
   const open = nav.classList.toggle('open');
