@@ -129,7 +129,8 @@ const WORDS = [
   ['flask', 'Testnet', 'A practice chain where the coins are free and mistakes are cheap.'],
   ['shield', 'Mainnet', 'The real chain, where BOT has value. Graduation lives here.'],
 ];
-$('#tiles').innerHTML = WORDS.map(([ic, name, def]) => `<button class="tile reveal" aria-label="${name}: ${def}"><span class="tile-in"><span class="tile-f">${icon(ic)}<b>${name}</b></span><span class="tile-b">${def}</span></span></button>`).join('');
+const GROUP = { Wallet: 'g', Network: 'g', Faucet: 'g', Gas: 'g', Transaction: 'b', Block: 'b', Explorer: 'b', Contract: 'v', Function: 'v', Event: 'v', Testnet: 'a', Mainnet: 'a' };
+$('#tiles').innerHTML = WORDS.map(([ic, name, def]) => `<button class="tile reveal t-${GROUP[name]}" aria-label="${name}: ${def}"><span class="tile-in"><span class="tile-f">${icon(ic)}<b>${name}</b></span><span class="tile-b">${def}</span></span></button>`).join('');
 $$('.tile').forEach((t) => { io.observe(t); t.addEventListener('click', () => t.classList.toggle('flip')); });
 
 /* ---------- Live demo stream (example hellos until the contract is live) ---------- */
