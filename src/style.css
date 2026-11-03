@@ -769,3 +769,81 @@ h1, h2, h3 { text-wrap: balance; }
 @media (max-width: 960px) { .stage-app { grid-template-columns: minmax(0, 1fr); min-height: 0; } .st-rail { display: none; } }
 .stage .hp-f b { font-size: 12px; font-weight: 500; }
 .st-net.main { background: var(--a-ink); color: #fff; }
+
+/* ===================== redesign: fewer beige boxes, sharper hierarchy ===================== */
+:root { --hair: #e9e7e2; --app-shadow: 0 0 0 1px rgba(30,29,28,.05), 0 1px 2px rgba(30,29,28,.06), 0 8px 20px -6px rgba(30,29,28,.12), 0 28px 64px -18px rgba(30,29,28,.26); }
+
+/* Who it's for: white cards with a hairline, compact, icon in a tile */
+.who-grid { gap: 14px; }
+.who { background: #fff; box-shadow: inset 0 0 0 1px var(--hair); min-height: 0; padding: 22px 20px 20px; gap: 8px; transition: box-shadow .2s var(--ease), transform .2s var(--out); }
+.who:hover { background: #fff; box-shadow: inset 0 0 0 1px #d6d3cc, 0 10px 30px -14px rgba(30,29,28,.2); transform: translateY(-2px); }
+.who .ic.lg { order: -1; margin: 0 0 18px; width: 40px; height: 40px; padding: 9px; border-radius: 12px; background: var(--soft); stroke-width: 1.4; box-sizing: border-box; }
+.who-n { position: absolute; top: 22px; right: 20px; }
+.who { position: relative; }
+.who h3 { margin-top: 0; min-height: 0; font-size: 17px; }
+.who p { min-height: 60px; }
+.who-tags { margin-top: 6px; border-top-color: var(--hair); }
+
+/* It checks, then unlocks: each mock is a small floating app window */
+.steps { gap: 28px; }
+.step-n { font-size: 13px; color: var(--ink); font-weight: 500; }
+.step .mock { position: relative; background: #fff; border-radius: 18px; box-shadow: var(--app-shadow); padding: 46px 18px 18px; min-height: 0; gap: 6px; margin-top: 18px; }
+.step .mock::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 30px; border-bottom: 1px solid #ececee; background: radial-gradient(circle at 16px 15px, #dedee2 3.5px, transparent 4px), radial-gradient(circle at 28px 15px, #dedee2 3.5px, transparent 4px), radial-gradient(circle at 40px 15px, #dedee2 3.5px, transparent 4px); }
+.step .mock-ic { width: 26px; height: 26px; border-radius: 8px; margin-bottom: 4px; }
+.step .mock-t { font-size: 15px; }
+.step .mock .muted { color: #6e6e73; font-size: 13px; }
+.step .mock .chip { background: #e7f6ee; }
+
+/* Glossary: light tiles with a hairline, icon beside the word, a quiet flip hint */
+.tiles { gap: 10px; }
+.tile { height: 92px; background: #fff; box-shadow: inset 0 0 0 1px var(--hair); border-radius: 16px; }
+.tile-f { flex-direction: row; align-items: center; justify-content: flex-start; gap: 14px; padding: 0 18px; }
+.tile-f .ic { width: 38px; height: 38px; padding: 9px; border-radius: 11px; background: var(--soft); box-sizing: border-box; stroke-width: 1.4; }
+.tile-f b { font-size: 16px; }
+.tile-f::after { content: 'flip'; margin-left: auto; font-size: 11px; font-family: var(--mono); color: #b0ada6; letter-spacing: .04em; }
+.tile-b { border-radius: 16px; padding: 14px 18px; font-size: 13.5px; }
+
+/* Comparison: white table, the First Block column highlighted */
+.table { background: #fff; box-shadow: inset 0 0 0 1px var(--hair); padding: 6px 0; }
+.tr { padding: 0; gap: 0; border-bottom-color: var(--hair); }
+.tr > span { padding: 15px 16px; }
+.tr > span:first-child { padding-left: 22px; font-weight: 500; }
+.tr > span:last-child { background: #f1f8f4; align-self: stretch; display: flex; align-items: center; }
+.tr.th > span:last-child { border-radius: 12px 12px 0 0; color: #0b5c3b; font-weight: 600; }
+.tr:last-child > span:last-child { border-radius: 0 0 12px 12px; }
+.tr { margin-right: 6px; }
+
+/* Hello wall: a small floating app window */
+.wall { background: #fff; box-shadow: var(--app-shadow); border-radius: 22px; padding: 0 0 16px; overflow: hidden; }
+.wall-head { padding: 12px 18px 12px 66px; border-bottom: 1px solid #ececee; font-size: 14px; position: relative; background: radial-gradient(circle at 22px 50%, #dedee2 4px, transparent 4.5px), radial-gradient(circle at 36px 50%, #dedee2 4px, transparent 4.5px), radial-gradient(circle at 50px 50%, #dedee2 4px, transparent 4.5px); }
+.wall-head .chip { background: #e7f6ee; }
+.wall-list.stream { padding: 6px 10px 0; gap: 2px; min-height: 0; }
+.wall-list.stream li { background: none; box-shadow: none; border-radius: 12px; padding: 13px 10px; border-bottom: 1px solid #f1f1f2; }
+.wall-list.stream li:last-child { border-bottom: 0; }
+.wall-list.stream li.new { background: #e7f6ee; border-bottom-color: transparent; }
+.wall-list.stream li b::before { content: ''; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--green); margin-right: 10px; vertical-align: 1px; opacity: .7; }
+.wall-foot { padding: 0 20px; }
+
+/* Works with: white tiles with a hairline */
+.int { background: #fff; box-shadow: inset 0 0 0 1px var(--hair); }
+.int:hover { background: #fff; box-shadow: inset 0 0 0 1px #d6d3cc, 0 10px 30px -14px rgba(30,29,28,.2); }
+.int-ic { background: var(--soft); box-shadow: none; }
+
+/* Graduates: skeletons of real cards instead of empty dashed boxes */
+.grad-empty { background: #fff; box-shadow: inset 0 0 0 1px var(--hair); }
+.grad-ghost { border: 1.5px dashed #e2dfd8; background:
+  linear-gradient(#efede8, #efede8) 20px 24px / 90px 10px no-repeat,
+  linear-gradient(#e7f6ee, #e7f6ee) calc(100% - 20px) 20px / 64px 18px no-repeat,
+  linear-gradient(#f2f0eb, #f2f0eb) 20px 62px / 70% 12px no-repeat,
+  linear-gradient(#f2f0eb, #f2f0eb) 20px 84px / 52% 12px no-repeat,
+  linear-gradient(#f4f2ee, #f4f2ee) 20px calc(100% - 24px) / 80px 10px no-repeat; }
+
+/* FAQ: a clean list with hairlines instead of stacked boxes */
+.faq { gap: 0; border-top: 1px solid var(--hair); }
+.q { background: none; border-radius: 0; border-bottom: 1px solid var(--hair); }
+.q > button { padding: 22px 4px; font-size: 17px; font-weight: 500; letter-spacing: -0.2px; }
+.q .ic { width: 28px; height: 28px; padding: 6px; border-radius: 50%; background: var(--soft); box-sizing: border-box; color: var(--ink); }
+.q-a p { padding: 0 48px 22px 4px; }
+.who-tags { margin-top: auto; }
+.who p { min-height: 0; margin-bottom: 14px; }
+#demo .title-muted { margin: -6px 0 18px; }
