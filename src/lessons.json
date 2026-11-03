@@ -5,13 +5,34 @@
     "headline": "Your wallet, on BOT Chain, in 2 minutes",
     "why": "A wallet is how you sign in to a blockchain. It holds your address, keeps your keys, and pays the small gas fee each action costs. Everything else in this course starts from a wallet that is on the right network and holds a little test BOT.",
     "tip": "Never share your secret recovery phrase, not even with us. First Block never asks for it.",
-    "learn": ["Wallet", "Address", "Network", "Gas"],
+    "learn": [
+      {
+        "t": "Your wallet is a key, not a vault",
+        "b": "MetaMask keeps a secret key on your device. From that key comes your public address, which is safe to share. Your BOT lives on the chain under that address; the key is only the proof that it is yours.",
+        "w": "address"
+      },
+      {
+        "t": "One address, many networks",
+        "b": "The same address works on every EVM chain. A network is simply which chain your wallet talks to, and each one has its own chain ID. Lessons use the testnet, where coins are free.",
+        "w": "networks"
+      },
+      {
+        "t": "Gas pays the network",
+        "b": "Every change you make to the chain costs a little gas, paid in BOT to the machines that run it. Reading the chain is free. That is why lesson 1 checks that you have some BOT.",
+        "w": "gasprice"
+      }
+    ],
     "hints": [
       "Wrong network? Open MetaMask, tap the network name at the top, and pick BOT Chain Testnet (chain ID 968). Or press Add network below.",
       "Faucet not working? It gives 10 test BOT per address every 24 hours. Check you pasted the right address and try again later.",
       "Nothing happens when you press a button? Look for the MetaMask pop-up, it may be hidden behind your browser window."
     ],
-    "happened": "checkIn() asked the contract to look at your wallet balance. Because you had test BOT to pay for gas, the balance was above zero, so the contract marked lesson 1 as done. The contract read the chain, not your word."
+    "happened": "checkIn() asked the contract to look at your wallet balance. Because you had test BOT to pay for gas, the balance was above zero, so the contract marked lesson 1 as done. The contract read the chain, not your word.",
+    "ideas": [
+      "Your address is public. Your recovery phrase never is.",
+      "A network is a chain with its own ID: testnet is 968, mainnet is 677.",
+      "Writing to the chain costs gas. Reading it is free."
+    ]
   },
   {
     "n": 2,
@@ -19,13 +40,34 @@
     "headline": "Send a transaction, then read it on the explorer",
     "why": "A transaction is a signed message that changes something on the chain. Once it is in a block, anyone can look it up. Reading your own transaction on the explorer is the fastest way to understand what a block, a hash and gas really are.",
     "tip": "Test BOT has no value. You can't lose real money in lessons 1 to 5.",
-    "learn": ["Transaction", "Block", "Explorer"],
+    "learn": [
+      {
+        "t": "Anatomy of a transaction",
+        "b": "A transaction is a small signed message: who sends it, to which address, how much BOT, which function to run, and a counter called the nonce so it can only happen once. This is the one you are about to send:",
+        "w": "anatomy"
+      },
+      {
+        "t": "Blocks keep coming",
+        "b": "The network bundles transactions into blocks, one after another. BOT Chain makes a new block about every 0.75 seconds. Once your transaction is inside one, it cannot be changed.",
+        "w": "blocks"
+      },
+      {
+        "t": "The explorer is a window",
+        "b": "Anyone can look up any transaction on the explorer. Its hash is its unique name. Nothing there needs your wallet, it is all public.",
+        "w": null
+      }
+    ],
     "hints": [
       "Transaction failed? Make sure MetaMask is on BOT Chain Testnet and your wallet still has test BOT for gas.",
       "The amount must be at least 0.001. The button sends exactly that, so don't lower it in MetaMask.",
       "Stuck on pending? Testnet is usually fast. Wait about 10 seconds, then press Check the chain."
     ],
-    "happened": "tip() received 0.001 test BOT and the contract saw the value you sent. The transaction was put into a block, which gave it a block number, and the network charged gas for the work. Those three numbers are your transaction's fingerprint."
+    "happened": "tip() received 0.001 test BOT and the contract saw the value you sent. The transaction was put into a block, which gave it a block number, and the network charged gas for the work. Those three numbers are your transaction's fingerprint.",
+    "ideas": [
+      "A transaction says who, to whom, how much, and what to run.",
+      "Inside a block, a transaction is final.",
+      "The hash is the transaction's ID, and the explorer shows it to anyone."
+    ]
   },
   {
     "n": 3,
@@ -33,13 +75,34 @@
     "headline": "Say hello and watch it land on the wall",
     "why": "A contract is code that lives at an address. You talk to it by calling its functions. Writing calls change state and cost gas, while reading calls are free. Contracts also emit events, small public logs that apps read to know what happened.",
     "tip": "Your name is public forever. Use a nickname if you prefer.",
-    "learn": ["Function", "Event", "Read vs write"],
+    "learn": [
+      {
+        "t": "Functions are the doors of a contract",
+        "b": "A contract exposes functions you can call. Your wallet does not send the name; it sends a 4-byte selector, the start of the hash of the function's signature.",
+        "w": "selector"
+      },
+      {
+        "t": "Reading is free, writing is not",
+        "b": "A read asks a node for an answer and changes nothing, so it needs no signature and no gas. A write changes the chain, so you sign it and pay gas. Try a read right now:",
+        "w": "read"
+      },
+      {
+        "t": "Events are the contract's public log",
+        "b": "When sayHello runs, the contract emits a Hello event with your address and name. Apps like this page read those logs to build the wall. Events are cheap to write and easy to search.",
+        "w": "events"
+      }
+    ],
     "hints": [
       "Name rejected? It must be 1 to 24 characters.",
       "Locked? Lesson 2 has to pass first, so the contract knows you sent the tip.",
       "Don't see your hello on the wall? The wall refreshes every few seconds, give it a moment."
     ],
-    "happened": "sayHello() checked your name, then emitted a Hello event with your address and name. Events are cheap logs that sites like this one read back from the chain. The wall below is built from those events and nothing else."
+    "happened": "sayHello() checked your name, then emitted a Hello event with your address and name. Events are cheap logs that sites like this one read back from the chain. The wall below is built from those events and nothing else.",
+    "ideas": [
+      "You call a function by its selector, the first 4 bytes of its hash.",
+      "Reads are free and instant. Writes need a signature and gas.",
+      "Events are logs that apps read back to see what happened."
+    ]
   },
   {
     "n": 4,
@@ -47,13 +110,34 @@
     "headline": "Deploy a Counter that only you own",
     "why": "Deploying means putting your own code on the chain at a new address. The constructor runs once, right then, and here it records you as the owner. After that nobody can change who owns it.",
     "tip": "Deploying costs a little more gas than a normal transaction, because the whole contract is written to the chain.",
-    "learn": ["Deploying", "Constructor", "Owner", "Contract address"],
+    "learn": [
+      {
+        "t": "Deploying is a transaction with no recipient",
+        "b": "To deploy, your wallet sends the compiled bytecode instead of calling a function. The chain runs the constructor once and the code gets its own address. Here is what you will send:",
+        "w": "bytecode"
+      },
+      {
+        "t": "You can predict the address",
+        "b": "A new contract's address comes from two things: your address and how many transactions you have sent (your nonce). So you can know it before you deploy. Try it, then compare after deploying.",
+        "w": "predict"
+      },
+      {
+        "t": "Why the check trusts nothing",
+        "b": "The Progress contract hashes the code at your address and compares it with Counter's hash, then reads owner(). Both are public, so it needs nobody's word for it.",
+        "w": null
+      }
+    ],
     "hints": [
       "Deploy button stuck? Check MetaMask for a pending pop-up, and make sure you are on BOT Chain Testnet.",
       "Submit failed with 'not your Counter'? Counter checks that its owner is the wallet that submits it. Use the same wallet that deployed it.",
       "Lost your Counter's address? Press Check the chain, the page can find it again if you already submitted it."
     ],
-    "happened": "Your wallet created a brand new contract. The submit step then asked the Progress contract to check two things: the code at your address is exactly our Counter, and owner() is you. Both are readable by anyone, so the check needed no trust."
+    "happened": "Your wallet created a brand new contract. The submit step then asked the Progress contract to check two things: the code at your address is exactly our Counter, and owner() is you. Both are readable by anyone, so the check needed no trust.",
+    "ideas": [
+      "Deploying sends bytecode; the constructor runs exactly once.",
+      "A contract address comes from the deployer and their nonce.",
+      "Code hash and owner() let anyone verify a contract."
+    ]
   },
   {
     "n": 5,
@@ -61,12 +145,33 @@
     "headline": "Press increment three times and read it back",
     "why": "A contract remembers things between calls. That memory is called state. Writing state costs gas, while reading it with a view call is free, which is why you can read the count as often as you like.",
     "tip": "Each increment is its own transaction, so you'll confirm three times in MetaMask.",
-    "learn": ["State", "View functions", "Gas per call"],
+    "learn": [
+      {
+        "t": "State is the contract's memory",
+        "b": "count is stored on the chain, inside your Counter. Every increment rewrites that number, which is why each press is a transaction.",
+        "w": null
+      },
+      {
+        "t": "Views are free, writes cost gas",
+        "b": "Reading count is a view call: free and instant. increment() changes state, so it costs gas every time. Compare them:",
+        "w": "gascompare"
+      },
+      {
+        "t": "Contracts can read other contracts",
+        "b": "finishCounter() does not take your word for the count. The Progress contract calls count() on your own Counter and checks it is at least 3.",
+        "w": null
+      }
+    ],
     "hints": [
       "Count is lower than 3? Press increment again until the number reaches 3.",
       "The count didn't change? Wait for the pending transaction to finish before pressing again.",
       "Wrong Counter? We always check the Counter you submitted in lesson 4."
     ],
-    "happened": "Each increment() changed the number stored in your Counter and emitted an event. finishCounter() then read count() from your own contract, saw at least 3, and passed the lesson. You wrote state, and the Progress contract read it back."
+    "happened": "Each increment() changed the number stored in your Counter and emitted an event. finishCounter() then read count() from your own contract, saw at least 3, and passed the lesson. You wrote state, and the Progress contract read it back.",
+    "ideas": [
+      "State lives on the chain and changes only through transactions.",
+      "View calls are free; every write costs gas.",
+      "One contract can read another to verify it."
+    ]
   }
 ]
