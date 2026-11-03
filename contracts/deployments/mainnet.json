@@ -1,0 +1,8 @@
+{
+  "network": "botMainnet",
+  "chainId": 677,
+  "graduation": "0x52d3764C4300384f73E3E4Cd34bF942A5e60D472",
+  "deployedBy": "project owner, through Remix",
+  "compiler": "solc 0.8.20, evmVersion paris, optimizer 200",
+  "note": "On-chain code equals the repo build except the metadata hash Remix appends (logic bytes identical, 2486 bytes)."
+}

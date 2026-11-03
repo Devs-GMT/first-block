@@ -1,6 +1,6 @@
-// Single place for deployed addresses. Leave null until deployed; the UI shows an honest "not deployed yet" state.
-// VITE_MAINNET_CONTRACT lets a test build point at a simulated chain; production leaves it unset.
-export const MAINNET_CONTRACT = import.meta.env.VITE_MAINNET_CONTRACT || null;
+// Single place for deployed addresses. Both contracts are public, so they live in the source and ship with every build.
+// VITE_MAINNET_CONTRACT overrides the mainnet address, which lets a test build point at a simulated chain.
+export const MAINNET_CONTRACT = import.meta.env.VITE_MAINNET_CONTRACT || '0x52d3764C4300384f73E3E4Cd34bF942A5e60D472';
 export const TESTNET_PROGRESS = '0xB50E42A85d6493A1aA7779CA6eE58b7541EC0952';
 // First block to scan for Hello events; set it to the Progress deployment block.
 export const TESTNET_START_BLOCK = 29043321;

@@ -1212,3 +1212,4 @@ code.brk { word-break: break-all; }
   .journey.jy > .pill { flex: none; }
   .jy-who b { font-size: 13px; }
 }
+.grad-form .sign { width: 100%; max-width: 520px; }

@@ -37,7 +37,7 @@ async function helloNameOf(addr) {
 
 /* ================= /graduate ================= */
 export function graduateView(root) {
-  let alive = true, st = { addr: null, prog: { count: 0, flags: 0 } }, mine = null, estimate = null, note = '', busy = false, last = null;
+  let alive = true, st = { addr: null, prog: { count: 0, flags: 0 } }, mine = null, estimate = null, note = '', busy = false, last = null, mbal = null;
   const g = () => graduationRead();
 
   const load = async () => {
@@ -49,6 +49,8 @@ export function graduateView(root) {
         if (id) { const e = await withRetry(() => g().grads(id - 1)); mine = { id, note: e.note, at: Number(e[2]) }; }
       } catch { /* leave null */ }
     }
+    mbal = null;
+    if (st.addr && wallet.chainId === NETWORKS.mainnet.id) { try { mbal = await withRetry(() => provider('mainnet').getBalance(st.addr)); } catch { /* shown as unknown */ } }
     if (alive) draw();
     // The estimate belongs to this wallet on mainnet, so it runs after every load: arriving there or switching there.
     if (alive && !mine && st.addr && g() && wallet.chainId === NETWORKS.mainnet.id && st.prog.count === 5) { await estimateGas(); if (alive) draw(); }
@@ -74,9 +76,19 @@ export function graduateView(root) {
     } else if (wallet.chainId !== NETWORKS.mainnet.id) {
       body = '<div class="banner"><span>Graduation happens on BOT Chain Mainnet. This step uses a little real BOT for gas.</span><button class="pill pill-dark sm" data-act="switch">Switch to Mainnet</button></div>';
     } else {
-      body = `<div class="grad-form"><p class="m-h">Note (optional)</p><input class="v-input wide" id="gradNote" maxlength="80" value="${esc(note)}" placeholder="Next I'm building a poll app!" autocomplete="off" />
-        <p class="muted sm">${estimate ? `Estimated gas: about ${estimate}.` : 'The gas estimate shows here.'} You'll need a little real BOT. <a class="link-under" href="${LINKS.botchain}" target="_blank" rel="noopener">Get BOT for gas</a></p>
-        <button class="pill pill-dark big" data-act="graduate"${busy ? ' disabled' : ''}>Graduate</button><p class="txs" data-s="g"></p></div>`;
+      const noBot = mbal === 0n;
+      const kv = (k, v) => `<div class="kv"><dt>${k}</dt><dd>${v}</dd></div>`;
+      body = `${noBot ? `<div class="banner"><span>Your wallet has no BOT on mainnet, so it can't pay for the gas. Graduating is the only step in First Block that uses real BOT.</span><span class="b-btns"><a class="pill pill-soft sm" href="${LINKS.botchain}" target="_blank" rel="noopener">Get BOT</a><button class="pill pill-dark sm" data-act="recheck">Check again</button></span></div>` : ''}
+        <div class="grad-form"><p class="m-h">Note (optional)</p><input class="v-input wide" id="gradNote" maxlength="80" value="${esc(note)}" placeholder="Next I'm building a poll app!" autocomplete="off" />
+        <p class="muted sm">Up to 80 characters. It is public and can't be edited later.</p>
+        <div class="sign"><p class="sign-h">${icon('pen', 'xs')}You're about to sign</p><dl>
+          ${kv('Contract', `Graduation ${link('mainnet', 'address', MAINNET_CONTRACT)}`)}
+          ${kv('Function', '<code>graduate(string note)</code>')}
+          ${kv('Sends', 'No BOT, only the gas fee')}
+          ${kv('Gas fee', estimate ? `${estimate}` : 'Estimating…')}
+          ${kv('Your BOT', mbal != null ? `${fmtBal(mbal)} BOT on mainnet` : '…')}</dl></div>
+        <p class="muted sm">One graduation per wallet. It is a real mainnet transaction.</p>
+        <button class="pill pill-dark big" data-act="graduate"${busy || noBot ? ' disabled' : ''}>Graduate</button><p class="txs" data-s="g"></p></div>`;
     }
     const typing = document.activeElement?.id === 'gradNote';
     root.innerHTML = `<div class="v-wrap"><p class="eyebrow">Graduation · Mainnet</p><h1 class="v-title">Graduate on BOT Chain mainnet.</h1>
@@ -124,6 +136,7 @@ export function graduateView(root) {
     const a = b.dataset.act;
     if (a === 'connect') connect().catch((er) => toast(explain(er)));
     if (a === 'switch') switchTo('mainnet').catch((er) => toast(explain(er)));
+    if (a === 'recheck') load();
     if (a === 'png') { const cv = $('#cardCv', root); const l = document.createElement('a'); l.download = 'first-block-graduate.png'; l.href = cv.toDataURL('image/png'); l.click(); }
     if (a === 'graduate') {
       note = ($('#gradNote', root)?.value || '').trim();
