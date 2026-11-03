@@ -44,20 +44,23 @@ async function loadTxs(addr) {
 
 async function receiptInfo(hash) {
   const r = await withRetry(() => provider('testnet').getTransactionReceipt(hash));
-  return r ? { hash, block: r.blockNumber, gas: r.gasUsed.toString() } : null;
+  return r ? { hash, block: r.blockNumber, gas: r.gasUsed.toString(), fee: r.fee } : null;
 }
 
 function journeyHTML(st, current) {
   const net = wallet.chainId === NETWORKS.testnet.id ? ['Testnet', 'ok'] : wallet.chainId === NETWORKS.mainnet.id ? ['Mainnet', 'ok'] : wallet.chainId ? [`Wrong network`, 'bad'] : null;
-  const dots = [1, 2, 3, 4, 5].map((n) => `<a href="/lesson/${n}" class="jd ${has(st.prog.flags, n) ? 'done' : n === current ? 'cur' : ''}" aria-label="Lesson ${n}"></a>`).join('') + '<a href="/graduate" class="jd gold" aria-label="Graduate"></a>';
-  return `<aside class="journey"><p class="eyebrow">Your journey</p>
-    ${st.addr ? `<p class="j-addr mono">${short(st.addr)} ${net ? `<span class="chip ${net[1] === 'bad' ? 'self' : ''}">${net[0]}</span>` : ''}</p>
-      <p class="j-line"><span>Test BOT</span><b>${st.bal != null ? fmtBal(st.bal) : '…'}</b></p>
-      <p class="j-line"><span>Progress</span><b>${st.prog.count} / 5</b></p>
-      <p class="j-line"><span>XP</span><b class="xp">${totalXp(st.addr, st.prog.flags)}</b></p>
-      <p class="j-line"><span>Day streak</span><b>${streakOf(st.addr) || 0}</b></p>`
-    : '<p class="muted sm">Connect your wallet to see your progress.</p><button class="pill pill-dark sm" data-act="connect">Connect wallet</button>'}
-    <div class="jdots">${dots}</div></aside>`;
+  const all = st.prog.count === 5;
+  const segs = [1, 2, 3, 4, 5].map((n) => `<a href="/lesson/${n}" class="jy-seg ${has(st.prog.flags, n) ? 'done' : ''} ${n === current ? 'cur' : ''}" title="Lesson ${n}: ${LESSONS[n - 1].title}" aria-label="Lesson ${n}"></a>`).join('')
+    + `<a href="/graduate" class="jy-seg gold ${all ? 'ready' : ''} ${current === 6 ? 'cur' : ''}" title="Graduate on mainnet" aria-label="Graduate"></a>`;
+  // A small colour mark made from the address, so each wallet is easy to recognise.
+  const hue = (i) => (st.addr ? parseInt(st.addr.slice(2 + i * 6, 8 + i * 6), 16) % 360 : 0);
+  const av = st.addr ? `<span class="jy-av" style="background:linear-gradient(135deg,hsl(${hue(0)} 70% 62%),hsl(${hue(1)} 70% 48%))"></span>` : '';
+  const stat = (v, k, cls = '') => `<div class="jy-st ${cls}"><b>${v}</b><span>${k}</span></div>`;
+  return `<aside class="journey jy ${st.addr ? '' : 'off'}">
+    <div class="jy-head">${av}<div class="jy-who">${st.addr ? `<code>${short(st.addr)}</code>${net ? `<span class="jy-net ${net[1]}"><i></i>${net[0]}</span>` : ''}` : '<b>Your journey</b><span class="jy-net">Not connected</span>'}</div></div>
+    <div class="jy-prog"><div class="jy-pl"><span>Lessons</span><b>${st.prog.count} of 5</b></div><div class="jy-bar">${segs}</div></div>
+    ${st.addr ? `<div class="jy-stats">${stat(st.bal != null ? fmtBal(st.bal) : '…', 'test BOT')}${stat(totalXp(st.addr, st.prog.flags), 'XP', 'xp')}${stat(streakOf(st.addr) || 0, 'day streak')}</div>`
+    : '<button class="pill pill-dark sm" data-act="connect">Connect wallet</button>'}</aside>`;
 }
 
 /* ================= /learn ================= */
@@ -337,11 +340,15 @@ export function lessonView(root, n) {
   };
 
   const happenedHTML = () => {
-    const t = tx || st.txMeta;
-    const field = (k, v) => `<span class="hp-f"><span>${k}</span><b class="mono">${v}</b></span>`;
-    return `<div class="happened"><div class="hp-diagram" aria-hidden="true"><span class="hp-node">${icon('wallet')}<i>Your wallet</i></span><span class="hp-arrow"></span><span class="hp-node">${icon('send')}<i>Transaction</i></span><span class="hp-arrow"></span><span class="hp-node">${icon('cube')}<i>Block</i></span></div>
-      <p class="muted">${L.happened}</p>
-      ${t ? `<div class="hp-data">${field('hash', link('testnet', 'tx', t.hash))}${field('block', `#${t.block}`)}${field('gas used', t.gas ? Number(t.gas).toLocaleString('en-US') : '…')}</div>` : '<p class="muted sm">Your own transaction hash, block number and gas used appear here once you finish this lesson.</p>'}</div>`;
+    const t = tx;
+    const fn = ['checkIn()', 'tip()', 'sayHello()', 'submitCounter()', 'finishCounter()'][n - 1];
+    const node = (ic, k, v, s) => `<div class="fl-n"><span class="fl-ic">${icon(ic)}</span><span class="fl-k">${k}</span><span class="fl-v">${v}</span><span class="fl-s">${s}</span></div>`;
+    const dash = '<span class="dim">—</span>';
+    return `<div class="happened"><p class="muted">${L.happened}</p>
+      <div class="flow ${t ? '' : 'empty'}">
+        <div class="fl-row">${node('wallet', 'Your wallet', st.addr ? `<code>${short(st.addr)}</code>` : dash, 'signed it')}<i class="fl-ar" aria-hidden="true"></i>${node('send', 'Transaction', t ? link('testnet', 'tx', t.hash) : dash, `called ${fn}`)}<i class="fl-ar" aria-hidden="true"></i>${node('cube', 'Block', t ? `<code>#${num(t.block)}</code>` : dash, 'final from here')}</div>
+        ${t ? `<dl class="fl-foot">${kv('Gas used', `<code>${num(t.gas)}</code>`)}${kv('Fee paid', t.fee != null ? tbot(t.fee) : '…')}</dl>` : '<p class="fl-wait">Your own wallet, transaction and block show up here once you finish this lesson.</p>'}
+      </div></div>`;
   };
 
   const draw = () => {
@@ -446,7 +453,7 @@ export function lessonView(root, n) {
     inc: (b) => act(b, 'inc', async (ui) => { await runTx('testnet', (s) => new Contract(st.counter, COUNTER_ABI, s).increment(), ui); await refresh(); }, false),
     'tx-finish': (b) => act(b, 'tx2', (ui) => runTx('testnet', (s) => new Contract(TESTNET_PROGRESS, PROGRESS_ABI, s).finishCounter(), ui).then(afterTx)),
   };
-  const afterTx = async (receipt) => { tx = { hash: receipt.hash, block: receipt.blockNumber, gas: receipt.gasUsed.toString() }; };
+  const afterTx = async (receipt) => { tx = { hash: receipt.hash, block: receipt.blockNumber, gas: receipt.gasUsed.toString(), fee: receipt.fee }; };
 
   root.onclick = (e) => {
     const el = e.target.closest('[data-act]');
