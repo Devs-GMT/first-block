@@ -1,9 +1,7 @@
 require("@nomicfoundation/hardhat-toolbox");
 require("dotenv").config();
 
-// Deployer keys live in contracts/.env (git-ignored): TESTNET_KEY=0x... for the testnet contracts.
-// The mainnet Graduation contract is deployed by hand through Remix.
-const testnetAccounts = process.env.TESTNET_KEY ? [process.env.TESTNET_KEY] : [];
+// The mainnet FirstBlock contract is deployed by hand through Remix, so no deployer key is needed here.
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
@@ -20,6 +18,5 @@ module.exports = {
   networks: {
     // Local node used to simulate mainnet (HH_CHAIN=677) when end-to-end testing the Graduation flow.
     hardhat: { chainId: Number(process.env.HH_CHAIN || 31337) },
-    botTestnet: { url: "https://rpc.bohr.life", chainId: 968, accounts: testnetAccounts },
   },
 };

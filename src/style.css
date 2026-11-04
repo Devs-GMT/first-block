@@ -1268,3 +1268,4 @@ h1, h2, h3, .v-title, .brand { font-family: var(--display); }
   .foot-cols > div.open .fcol-btn .ic { transform: rotate(180deg); }
 }
 .hc.done .hc-b code, .hc.next .hc-b code { opacity: 1; }
+.hero .lead { text-wrap: balance; }

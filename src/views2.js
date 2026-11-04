@@ -1,5 +1,5 @@
 import { Contract } from 'ethers';
-import { MAINNET_CONTRACT, LINKS, TESTNET_START_BLOCK } from './config.js';
+import { MAINNET_CONTRACT, LINKS, PROGRESS_START_BLOCK } from './config.js';
 import { GRADUATION_ABI, NETWORKS, connect, graduationRead, hasWallet, onWallet, progressRead, provider, short, switchTo, wallet, withRetry } from './chain.js';
 import { explain, fmtBal, runTx } from './tx.js';
 import { esc, icon, link, loadState, toast } from './views.js';
@@ -23,8 +23,8 @@ export function drawCard(canvas, { name, wallet: w, date, id, verified }) {
   c.fillText(nm, 96, 316);
   c.fillStyle = '#6b7078'; c.font = '400 28px "JetBrains Mono", ui-monospace, monospace'; c.fillText(w, 96, 376);
   c.fillStyle = '#15171a'; c.font = '500 30px Inter, system-ui, sans-serif'; c.fillText(`Graduate #${id}  ·  ${date}`, 96, 450);
-  c.fillStyle = verified ? '#0f7a50' : '#6b7078'; c.font = '500 28px Inter, system-ui, sans-serif';
-  c.fillText(verified ? '5/5 ✓ verified on testnet' : '5/5 self-reported', 96, 500);
+  c.fillStyle = '#0f7a50'; c.font = '500 28px Inter, system-ui, sans-serif';
+  c.fillText('5/5 ✓ verified on chain', 96, 500);
   c.fillStyle = '#15171a'; c.font = '500 24px Inter, system-ui, sans-serif'; c.textAlign = 'right'; c.fillText('BOT Chain mainnet', W - 96, H - 84); c.textAlign = 'left';
 }
 function roundRect(c, x, y, w, h, r) { c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); }
@@ -32,7 +32,7 @@ function roundRect(c, x, y, w, h, r) { c.beginPath(); c.moveTo(x + r, y); c.arcT
 async function helloNameOf(addr) {
   const p = progressRead();
   if (!p) return null;
-  try { const logs = await withRetry(() => p.queryFilter(p.filters.Hello(addr), TESTNET_START_BLOCK, 'latest')); return logs.length ? logs[logs.length - 1].args.name : null; } catch { return null; }
+  try { const logs = await withRetry(() => p.queryFilter(p.filters.Hello(addr), PROGRESS_START_BLOCK, 'latest')); return logs.length ? logs[logs.length - 1].args.name : null; } catch { return null; }
 }
 
 /* ================= /graduate ================= */
@@ -64,7 +64,7 @@ export function graduateView(root) {
     const five = st.prog.count === 5;
     let body;
     if (!MAINNET_CONTRACT) {
-      body = `<div class="banner"><span>The mainnet Graduation contract isn't deployed yet, so graduating opens soon. Your progress above is read live from testnet.</span></div>${st.addr ? '<p class="m-h">Preview of your card</p><canvas id="cardCv" class="card-cv" width="1200" height="630"></canvas>' : ''}`;
+      body = `<div class="banner"><span>The First Block contract isn't deployed yet, so graduating opens soon. Your progress above is read live from the chain.</span></div>${st.addr ? '<p class="m-h">Preview of your card</p><canvas id="cardCv" class="card-cv" width="1200" height="630"></canvas>' : ''}`;
     } else if (!hasWallet()) {
       body = '<div class="banner"><span>You need MetaMask to graduate.</span><a class="pill pill-dark sm" href="https://metamask.io/download/" target="_blank" rel="noopener">Install MetaMask</a></div>';
     } else if (!st.addr) {
@@ -82,7 +82,7 @@ export function graduateView(root) {
         <div class="grad-form"><p class="m-h">Note (optional)</p><input class="v-input wide" id="gradNote" maxlength="80" value="${esc(note)}" placeholder="Next I'm building a poll app!" autocomplete="off" />
         <p class="muted sm">Up to 80 characters. It is public and can't be edited later.</p>
         <div class="sign"><p class="sign-h">${icon('pen', 'xs')}You're about to sign</p><dl>
-          ${kv('Contract', `Graduation ${link('mainnet', 'address', MAINNET_CONTRACT)}`)}
+          ${kv('Contract', `First Block ${link('mainnet', 'address', MAINNET_CONTRACT)}`)}
           ${kv('Function', '<code>graduate(string note)</code>')}
           ${kv('Sends', 'No BOT, only the gas fee')}
           ${kv('Gas fee', estimate ? `${estimate}` : 'Estimating…')}
@@ -92,7 +92,7 @@ export function graduateView(root) {
     }
     const typing = document.activeElement?.id === 'gradNote';
     root.innerHTML = `<div class="v-wrap"><p class="eyebrow">Graduation · Mainnet</p><h1 class="v-title">Graduate on BOT Chain mainnet.</h1>
-      <p class="muted v-lead">One mainnet transaction records that you finished First Block, with a note if you want to leave one. Mainnet can't read testnet, so the site unlocks this after 5 of 5, and the wall marks you Verified when testnet agrees.</p>
+      <p class="muted v-lead">One mainnet transaction records that you finished First Block, with a note if you want to leave one. The contract only accepts wallets that passed all five lessons, so every graduate on the wall is Verified.</p>
       <div class="g-prog"><span>Lessons passed</span><b>${st.prog.count} / 5</b><div class="pbar"><i style="width:${st.prog.count * 20}%"></i></div></div>
       ${body}</div>`;
     // A late gas estimate redraws the form; keep the caret where the learner was typing.
@@ -107,7 +107,7 @@ export function graduateView(root) {
     const cv = $('#cardCv', root);
     if (!cv || !alive) return;
     const date = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-    drawCard(cv, { name, wallet: st.addr, date, id: '—', verified: st.prog.count === 5 });
+    drawCard(cv, { name, wallet: st.addr, date, id: '—' });
   };
 
   const paintCard = async () => {
@@ -115,7 +115,7 @@ export function graduateView(root) {
     if (!cv) return;
     const name = (await helloNameOf(st.addr)) || short(st.addr);
     const date = new Date(mine.at * 1000).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-    drawCard(cv, { name, wallet: st.addr, date, id: mine.id, verified: st.prog.count === 5 });
+    drawCard(cv, { name, wallet: st.addr, date, id: mine.id });
     const text = `I just graduated from First Block on @BOTChain_ai: five lessons, all checked on chain. Graduate #${mine.id}.`;
     $('#shareX', root).href = `https://x.com/intent/post?text=${encodeURIComponent(text)}&url=${encodeURIComponent(location.origin)}`;
   };
@@ -171,19 +171,17 @@ function confetti() {
 /* ================= /wall ================= */
 export function wallView(root) {
   let alive = true;
-  const draw = (html) => { if (alive) root.innerHTML = `<div class="v-wrap"><p class="eyebrow">Graduates</p><h1 class="v-title">The wall.</h1><p class="muted v-lead">Everyone who graduated on BOT Chain mainnet, newest first. <b>Verified</b> means the testnet Progress contract confirms 5 of 5 for that wallet, checked live. Anyone else is <b>Self-reported</b>.</p>${html}</div>`; };
+  const draw = (html) => { if (alive) root.innerHTML = `<div class="v-wrap"><p class="eyebrow">Graduates</p><h1 class="v-title">The wall.</h1><p class="muted v-lead">Everyone who graduated on BOT Chain mainnet, newest first. <b>Verified</b> means the contract itself checked that the wallet passed all five lessons before it accepted the graduation.</p>${html}</div>`; };
   const g = graduationRead();
-  if (!g) { draw('<div class="grad-empty"><p>No graduates yet.</p><p class="muted sm">The mainnet Graduation contract isn\'t deployed yet. The wall fills in as soon as it is.</p></div>'); return () => { alive = false; }; }
+  if (!g) { draw('<div class="grad-empty"><p>No graduates yet.</p><p class="muted sm">The First Block contract isn\'t deployed yet. The wall fills in as soon as it is.</p></div>'); return () => { alive = false; }; }
   draw('<p class="muted"><span class="spin"></span> Reading the wall…</p>');
   (async () => {
     try {
       const total = Number(await withRetry(() => g.total()));
       if (!total) return draw('<div class="grad-empty"><p>No graduates yet.</p><p class="muted sm">Be the first.</p><a class="pill pill-dark sm" href="/lesson/1">Start lesson 1</a></div>');
       const page = [...(await withRetry(() => g.getGrads(Math.max(0, total - 60), 60)))].reverse();
-      const p = progressRead();
       const ids = page.map((_, i) => total - i);
-      const verified = await Promise.all(page.map(async (x) => { if (!p) return false; try { return Number((await p.progressOf(x.wallet))[0]) === 5; } catch { return false; } }));
-      draw(`<p class="muted sm">${total.toLocaleString('en-US')} graduate${total === 1 ? '' : 's'}</p><div class="wall-grid">${page.map((x, i) => `<article class="grad-card"><div class="m-row"><code>#${ids[i]} · ${short(x.wallet)}</code><span class="chip ${verified[i] ? '' : 'self'}">${verified[i] ? '✓ Verified' : 'Self-reported'}</span></div><q>${x.note ? esc(x.note) : 'No note left.'}</q><span class="muted sm">${new Date(Number(x[2]) * 1000).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</span></article>`).join('')}</div>`);
+      draw(`<p class="muted sm">${total.toLocaleString('en-US')} graduate${total === 1 ? '' : 's'}</p><div class="wall-grid">${page.map((x, i) => `<article class="grad-card"><div class="m-row"><code>#${ids[i]} · ${short(x.wallet)}</code><span class="chip">✓ Verified</span></div><q>${x.note ? esc(x.note) : 'No note left.'}</q><span class="muted sm">${new Date(Number(x[2]) * 1000).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</span></article>`).join('')}</div>`);
     } catch { draw('<p class="muted">Couldn\'t reach mainnet right now. <button class="link-under" onclick="location.reload()">Retry</button></p>'); }
   })();
   return () => { alive = false; };
@@ -194,12 +192,12 @@ const DOCS = {
   privacy: ['Privacy', 'Short version: there are no accounts, no cookies and no analytics.', [
     ['What stays in your browser', 'XP, day streaks, whether you connected before, and the address of the Counter you deployed are kept in your browser\'s local storage. Clearing your browser data removes them.'],
     ['What goes to the chain', 'Lesson actions, your hello name and your graduation note are transactions on public blockchains. They are public and permanent, so use a nickname if you prefer.'],
-    ['Who sees your requests', 'The page reads BOT Chain through its public RPCs (rpc.bohr.life and rpc.botchain.ai). Like any web server, they and the hosting provider can see your IP address and the addresses being looked up.'],
+    ['Who sees your requests', 'The page reads BOT Chain through its public RPCs (rpc.botchain.ai). Like any web server, they and the hosting provider can see your IP address and the addresses being looked up.'],
     ['What we never ask for', 'Your secret recovery phrase or private keys. Your wallet signs every transaction itself.'],
   ]],
   terms: ['Terms', 'First Block is a free community project to learn BOT Chain. It is not official BOT Chain education.', [
     ['As is', 'The site and contracts are provided as they are, without warranty. Lessons can have mistakes, and the official BOT Chain docs always win.'],
-    ['Testnet and mainnet', 'Lessons 1 to 5 use BOT Chain testnet, whose coins have no value. Graduation is a mainnet transaction and costs a little real BOT for gas, paid from your wallet.'],
+    ['Real BOT, real transactions', 'Every lesson and graduation is a transaction on BOT Chain mainnet, so each one costs a little real BOT for gas, paid from your wallet. A tip of 0.001 BOT in lesson 2 stays in the First Block contract. The whole course takes about 0.01 BOT.'],
     ['Your wallet, your call', 'You decide what your wallet signs. Check every transaction before you confirm it, and never share your recovery phrase.'],
     ['Public content', 'Names and notes you write on chain can\'t be edited or removed. Don\'t write personal information there.'],
     ['Open source', 'The code and contracts are on GitHub, so anyone can read exactly what they do.'],

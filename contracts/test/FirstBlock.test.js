@@ -8,8 +8,8 @@ async function setup() {
   const Counter = await ethers.getContractFactory('Counter');
   const ref = await Counter.deploy();
   const hash = ethers.keccak256(await ethers.provider.getCode(await ref.getAddress()));
-  const Progress = await ethers.getContractFactory('FirstBlockProgress');
-  const progress = await Progress.deploy(hash);
+  const FirstBlock = await ethers.getContractFactory('FirstBlock');
+  const progress = await FirstBlock.deploy(hash);
   return { owner, ada, bob, Counter, progress, hash };
 }
 
@@ -50,7 +50,7 @@ describe('Counter', () => {
   });
 });
 
-describe('FirstBlockProgress', () => {
+describe('FirstBlock lessons', () => {
   it('passes lesson 1 when the wallet has gas', async () => {
     const ctx = await setup();
     await expect(ctx.progress.connect(ctx.ada).checkIn()).to.emit(ctx.progress, 'LessonDone').withArgs(ctx.ada.address, 1);
@@ -68,7 +68,7 @@ describe('FirstBlockProgress', () => {
     await expect(p.finishCounter()).to.be.revertedWithCustomError(progress, 'NotDone').withArgs(4);
   });
 
-  it('needs at least 0.001 test BOT for lesson 2', async () => {
+  it('needs at least 0.001 BOT for lesson 2', async () => {
     const ctx = await setup();
     const p = ctx.progress.connect(ctx.ada);
     await p.checkIn();
@@ -93,8 +93,7 @@ describe('FirstBlockProgress', () => {
     await expect(p.submitCounter(ctx.bob.address)).to.be.revertedWithCustomError(ctx.progress, 'NotACounter');
     const other = await ctx.Counter.connect(ctx.bob).deploy();
     await expect(p.submitCounter(await other.getAddress())).to.be.revertedWithCustomError(ctx.progress, 'NotYourCounter');
-    const fake = await (await ethers.getContractFactory('FirstBlockGraduation')).deploy();
-    await expect(p.submitCounter(await fake.getAddress())).to.be.revertedWithCustomError(ctx.progress, 'NotACounter');
+    await expect(p.submitCounter(await ctx.progress.getAddress())).to.be.revertedWithCustomError(ctx.progress, 'NotACounter');
     const mine = await ctx.Counter.connect(ctx.ada).deploy();
     await expect(p.submitCounter(await mine.getAddress())).to.emit(ctx.progress, 'LessonDone').withArgs(ctx.ada.address, 4);
     expect(await ctx.progress.counterOf(ctx.ada.address)).to.equal(await mine.getAddress());
@@ -132,37 +131,46 @@ describe('FirstBlockProgress', () => {
   });
 });
 
-describe('FirstBlockGraduation', () => {
-  async function grad() {
-    const [, ada, bob] = await ethers.getSigners();
-    const g = await (await ethers.getContractFactory('FirstBlockGraduation')).deploy();
-    return { g, ada, bob };
-  }
+describe('FirstBlock graduation', () => {
+  it('only lets a wallet graduate after passing all five lessons', async () => {
+    const ctx = await setup();
+    const g = ctx.progress.connect(ctx.ada);
+    await expect(g.graduate('too early')).to.be.revertedWithCustomError(ctx.progress, 'NotFinished').withArgs(0);
+    await walk(ctx, ctx.ada, 3);
+    await expect(g.graduate('still early')).to.be.revertedWithCustomError(ctx.progress, 'NotFinished').withArgs(3);
+    expect(await ctx.progress.total()).to.equal(0n);
+  });
 
   it('records a graduate once per wallet', async () => {
-    const { g, ada } = await grad();
-    await expect(g.connect(ada).graduate("Next I'm building a poll app!")).to.emit(g, 'Graduated').withArgs(1, ada.address);
-    expect(await g.total()).to.equal(1n);
-    expect(await g.isGraduate(ada.address)).to.equal(true);
-    await expect(g.connect(ada).graduate('again')).to.be.revertedWithCustomError(g, 'AlreadyGraduated');
+    const ctx = await setup();
+    await walk(ctx, ctx.ada, 5);
+    const g = ctx.progress.connect(ctx.ada);
+    await expect(g.graduate("Next I'm building a poll app!")).to.emit(ctx.progress, 'Graduated').withArgs(1, ctx.ada.address);
+    expect(await ctx.progress.total()).to.equal(1n);
+    expect(await ctx.progress.isGraduate(ctx.ada.address)).to.equal(true);
+    await expect(g.graduate('again')).to.be.revertedWithCustomError(ctx.progress, 'AlreadyGraduated');
   });
 
   it('caps the note at 80 bytes and allows an empty note', async () => {
-    const { g, ada, bob } = await grad();
-    await expect(g.connect(ada).graduate('x'.repeat(81))).to.be.revertedWithCustomError(g, 'NoteTooLong');
-    await g.connect(ada).graduate('x'.repeat(80));
-    await g.connect(bob).graduate('');
-    expect(await g.total()).to.equal(2n);
+    const ctx = await setup();
+    await walk(ctx, ctx.ada, 5);
+    await walk(ctx, ctx.bob, 5);
+    await expect(ctx.progress.connect(ctx.ada).graduate('x'.repeat(81))).to.be.revertedWithCustomError(ctx.progress, 'NoteTooLong');
+    await ctx.progress.connect(ctx.ada).graduate('x'.repeat(80));
+    await ctx.progress.connect(ctx.bob).graduate('');
+    expect(await ctx.progress.total()).to.equal(2n);
   });
 
   it('pages through graduates oldest first', async () => {
-    const { g, ada, bob } = await grad();
-    await g.connect(ada).graduate('one');
-    await g.connect(bob).graduate('two');
-    const page = await g.getGrads(0, 10);
+    const ctx = await setup();
+    await walk(ctx, ctx.ada, 5);
+    await walk(ctx, ctx.bob, 5);
+    await ctx.progress.connect(ctx.ada).graduate('one');
+    await ctx.progress.connect(ctx.bob).graduate('two');
+    const page = await ctx.progress.getGrads(0, 10);
     expect(page.map((x) => x.note)).to.deep.equal(['one', 'two']);
-    expect((await g.getGrads(1, 1)).map((x) => x.wallet)).to.deep.equal([bob.address]);
-    expect(await g.getGrads(5, 3)).to.have.length(0);
-    expect(await g.isGraduate(ethers.ZeroAddress)).to.equal(false);
+    expect((await ctx.progress.getGrads(1, 1)).map((x) => x.wallet)).to.deep.equal([ctx.bob.address]);
+    expect(await ctx.progress.getGrads(5, 3)).to.have.length(0);
+    expect(await ctx.progress.isGraduate(ethers.ZeroAddress)).to.equal(false);
   });
 });

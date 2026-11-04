@@ -17,18 +17,19 @@ export async function prepare(which) {
 /** Turns any wallet or contract error into one plain sentence that says what to do next. */
 export function explain(e) {
   if (e?.kind === 'no-wallet') return 'MetaMask wasn\'t found. Install it, then reload this page.';
-  if (e?.kind === 'no-gas') return e.which === 'mainnet' ? 'Your wallet has no BOT on mainnet to pay gas. Get a little BOT first.' : 'Your wallet has no test BOT for gas. Get some from the faucet, then try again.';
+  if (e?.kind === 'no-gas') return 'Your wallet has no BOT on mainnet to pay gas. Get a little BOT first, then try again.';
   if (e?.code === 4001 || e?.code === 'ACTION_REJECTED' || /user rejected|denied/i.test(e?.message || '')) return 'You cancelled it in MetaMask. Press the button to try again.';
   const name = e?.revert?.name || decodeName(e);
   const args = e?.revert?.args || [];
   switch (name) {
     case 'NotDone': return `Finish lesson ${args[0]} first, then come back.`;
-    case 'NoGas': return 'The contract sees no BOT in your wallet. Get some from the faucet first.';
-    case 'TipTooSmall': return 'The tip has to be at least 0.001 test BOT.';
+    case 'NoGas': return 'The contract sees no BOT in your wallet. Get a little BOT for gas first.';
+    case 'TipTooSmall': return 'The tip has to be at least 0.001 BOT.';
     case 'BadName': return 'Your name has to be between 1 and 24 characters.';
     case 'NotACounter': return 'That address isn\'t a First Block Counter. Deploy one with the button above.';
     case 'NotYourCounter': return 'That Counter belongs to a different wallet. Deploy your own with this wallet.';
     case 'CountTooLow': return `We found your Counter, but count is ${args[0]}. Press increment ${3 - Number(args[0])} more time${3 - Number(args[0]) === 1 ? '' : 's'}.`;
+    case 'NotFinished': return `Pass all five lessons first. You're at ${args[0]} of 5.`;
     case 'AlreadyGraduated': return 'This wallet has already graduated.';
     case 'NoteTooLong': return 'Your note can be 80 characters at most.';
     default: break;

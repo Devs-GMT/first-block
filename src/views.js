@@ -1,6 +1,6 @@
 import { Contract, ContractFactory, Interface, formatEther, formatUnits, getCreateAddress, parseEther } from 'ethers';
 import LESSONS from './lessons.json';
-import { MAINNET_CONTRACT, TESTNET_PROGRESS, TESTNET_START_BLOCK, LINKS } from './config.js';
+import { MAINNET_CONTRACT, PROGRESS_CONTRACT, PROGRESS_START_BLOCK, LESSON_NET, LINKS } from './config.js';
 import { COUNTER_ABI, NETWORKS, PROGRESS_ABI, connect, graduationRead, hasWallet, onWallet, progressRead, provider, short, switchTo, wallet, withRetry } from './chain.js';
 import { explain, fmtBal, prepare, runTx } from './tx.js';
 import { award, startLesson, streakOf, totalXp } from './xp.js';
@@ -23,7 +23,7 @@ async function loadState(addr) {
   const st = { addr, prog: { count: 0, flags: 0 }, bal: null, counter: null, rpcFailed: false };
   if (!addr) return st;
   const p = progressRead();
-  try { st.bal = await withRetry(() => provider('testnet').getBalance(addr)); } catch { st.rpcFailed = true; }
+  try { st.bal = await withRetry(() => provider(LESSON_NET).getBalance(addr)); } catch { st.rpcFailed = true; }
   if (p) {
     try { const [c, f] = await withRetry(() => p.progressOf(addr)); st.prog = { count: Number(c), flags: Number(f) }; } catch { st.rpcFailed = true; }
     try { const c = await withRetry(() => p.counterOf(addr)); st.counter = c !== ZERO ? c : null; } catch { /* leave null */ }
@@ -36,19 +36,19 @@ async function loadState(addr) {
 async function loadTxs(addr) {
   const p = progressRead();
   if (!p || !addr) return {};
-  const logs = await withRetry(() => p.queryFilter(p.filters.LessonDone(addr), TESTNET_START_BLOCK, 'latest'));
+  const logs = await withRetry(() => p.queryFilter(p.filters.LessonDone(addr), PROGRESS_START_BLOCK, 'latest'));
   const m = {};
   logs.forEach((l) => { const n = Number(l.args.lesson); if (!m[n]) m[n] = { hash: l.transactionHash, block: l.blockNumber }; });
   return m;
 }
 
 async function receiptInfo(hash) {
-  const r = await withRetry(() => provider('testnet').getTransactionReceipt(hash));
+  const r = await withRetry(() => provider(LESSON_NET).getTransactionReceipt(hash));
   return r ? { hash, block: r.blockNumber, gas: r.gasUsed.toString(), fee: r.fee } : null;
 }
 
 function journeyHTML(st, current) {
-  const net = wallet.chainId === NETWORKS.testnet.id ? ['Testnet', 'ok'] : wallet.chainId === NETWORKS.mainnet.id ? ['Mainnet', 'ok'] : wallet.chainId ? [`Wrong network`, 'bad'] : null;
+  const net = wallet.chainId === NETWORKS[LESSON_NET].id ? ['Mainnet', 'ok'] : wallet.chainId ? [`Wrong network`, 'bad'] : null;
   const all = st.prog.count === 5;
   const segs = [1, 2, 3, 4, 5].map((n) => `<a href="/lesson/${n}" class="jy-seg ${has(st.prog.flags, n) ? 'done' : ''} ${n === current ? 'cur' : ''}" title="Lesson ${n}: ${LESSONS[n - 1].title}" aria-label="Lesson ${n}"></a>`).join('')
     + `<a href="/graduate" class="jy-seg gold ${all ? 'ready' : ''} ${current === 6 ? 'cur' : ''}" title="Graduate on mainnet" aria-label="Graduate"></a>`;
@@ -59,7 +59,7 @@ function journeyHTML(st, current) {
   return `<aside class="journey jy ${st.addr ? '' : 'off'}">
     <div class="jy-head">${av}<div class="jy-who">${st.addr ? `<code>${short(st.addr)}</code>${net ? `<span class="jy-net ${net[1]}"><i></i>${net[0]}</span>` : ''}` : '<b>Your journey</b><span class="jy-net">Not connected</span>'}</div></div>
     <div class="jy-prog"><div class="jy-pl"><span>Lessons</span><b>${st.prog.count} of 5</b></div><div class="jy-bar">${segs}</div></div>
-    ${st.addr ? `<div class="jy-stats">${stat(st.bal != null ? fmtBal(st.bal) : '…', 'test BOT')}${stat(totalXp(st.addr, st.prog.flags), 'XP', 'xp')}${stat(streakOf(st.addr) || 0, 'day streak')}</div>`
+    ${st.addr ? `<div class="jy-stats">${stat(st.bal != null ? fmtBal(st.bal) : '…', 'BOT')}${stat(totalXp(st.addr, st.prog.flags), 'XP', 'xp')}${stat(streakOf(st.addr) || 0, 'day streak')}</div>`
     : '<button class="pill pill-dark sm" data-act="connect">Connect wallet</button>'}</aside>`;
 }
 
@@ -73,16 +73,16 @@ export function learnView(root) {
       const cls = done ? 'done' : unlocked ? 'cur' : 'lock';
       const L = LESSONS[n - 1];
       return `<div class="blk-wrap"><a class="blk ${cls}" href="/lesson/${n}"><span class="blk-n">${done ? icon('check') : n}</span><b>${L.title}</b><span class="blk-s">${done ? 'Passed' : unlocked ? 'Up next' : 'Locked'}</span></a>
-        ${done && txs[n] ? link('testnet', 'tx', txs[n].hash, short(txs[n].hash)) : '<span class="mono dim">&nbsp;</span>'}
+        ${done && txs[n] ? link(LESSON_NET, 'tx', txs[n].hash, short(txs[n].hash)) : '<span class="mono dim">&nbsp;</span>'}
         <span class="blk-stat muted sm">${stats ? `${stats[n - 1]} wallet${stats[n - 1] === 1 ? '' : 's'} finished` : ''}</span></div>`;
     }).join('<i class="blk-link"></i>');
     const all = st.prog.count === 5;
     root.innerHTML = `<div class="v-wrap"><p class="eyebrow">Your path</p><h1 class="v-title">Five blocks, then graduate.</h1>
-      <p class="muted v-lead">Each block ends with a real action on BOT Chain testnet, checked by the chain itself. Finish one to unlock the next.</p>
+      <p class="muted v-lead">Each block ends with a real action on BOT Chain, checked by the chain itself. Finish one to unlock the next.</p>
       ${!st.addr ? `<div class="banner"><span>${hasWallet() ? 'Connect your wallet to see which blocks you have passed.' : 'Install MetaMask to start. Everything here is still readable without it.'}</span>${hasWallet() ? '<button class="pill pill-dark sm" data-act="connect">Connect wallet</button>' : '<a class="pill pill-dark sm" href="https://metamask.io/download/" target="_blank" rel="noopener">Install MetaMask</a>'}</div>` : ''}
-      ${!TESTNET_PROGRESS ? '<div class="banner"><span>The Progress contract isn\'t deployed yet, so checks aren\'t live.</span></div>' : ''}
+      ${!PROGRESS_CONTRACT ? '<div class="banner"><span>The First Block contract isn\'t deployed yet, so checks aren\'t live.</span></div>' : ''}
       <div class="chain">${blocks}<i class="blk-link ${all ? 'on' : ''}"></i><div class="blk-wrap"><a class="blk gold ${all ? 'cur' : 'lock'}" href="/graduate"><span class="blk-n">${icon('cap')}</span><b>Graduate</b><span class="blk-s">${all ? 'Ready' : 'After 5 of 5'}</span></a><span class="mono dim">&nbsp;</span><span class="blk-stat muted sm">on BOT Chain mainnet</span></div></div>
-      ${st.rpcFailed ? '<p class="muted sm">Couldn\'t reach the testnet RPC. <button class="link-under" data-act="refresh">Retry</button></p>' : ''}</div>`;
+      ${st.rpcFailed ? '<p class="muted sm">Couldn\'t reach the BOT Chain RPC. <button class="link-under" data-act="refresh">Retry</button></p>' : ''}</div>`;
   };
   const refresh = async () => {
     st = await loadState(wallet.address);
@@ -134,7 +134,7 @@ const PI = new Interface(PROGRESS_ABI);
 const CI = new Interface(COUNTER_ABI);
 const tbot = (wei) => {
   const v = Number(formatEther(wei));
-  return `${v === 0 ? '0' : v < 0.000001 ? '< 0.000001' : v.toLocaleString('en-US', { maximumSignificantDigits: 3 })} test BOT`;
+  return `${v === 0 ? '0' : v < 0.000001 ? '< 0.000001' : v.toLocaleString('en-US', { maximumSignificantDigits: 3 })} BOT`;
 };
 const kv = (k, v, cls = '') => `<div class="kv ${cls}"><dt>${k}</dt><dd>${v}</dd></div>`;
 const num = (x) => Number(x).toLocaleString('en-US');
@@ -148,10 +148,10 @@ export function lessonView(root, n) {
   let blockTimer = 0;
 
   const blocker = () => {
-    if (!TESTNET_PROGRESS) return { k: 'nocontract' };
+    if (!PROGRESS_CONTRACT) return { k: 'nocontract' };
     if (!hasWallet()) return { k: 'no-wallet' };
     if (!wallet.address) return { k: 'connect' };
-    if (wallet.chainId !== NETWORKS.testnet.id) return { k: 'chain' };
+    if (wallet.chainId !== NETWORKS[LESSON_NET].id) return { k: 'chain' };
     if (n > 1 && !has(st.prog.flags, n - 1)) return { k: 'locked' };
     if (st.bal === 0n) return { k: 'gas' };
     return null;
@@ -160,12 +160,12 @@ export function lessonView(root, n) {
     const b = blocker();
     if (!b) return '';
     const m = {
-      nocontract: ['The Progress contract isn\'t deployed yet, so this lesson can\'t be checked.', ''],
+      nocontract: ['The First Block contract isn\'t deployed yet, so this lesson can\'t be checked.', ''],
       'no-wallet': ['You need MetaMask for this lesson. Everything else on this page is still readable.', '<a class="pill pill-dark sm" href="https://metamask.io/download/" target="_blank" rel="noopener">Install MetaMask</a>'],
       connect: ['Connect your wallet to start.', '<button class="pill pill-dark sm" data-act="connect">Connect wallet</button>'],
-      chain: [`You're on ${wallet.chainId === NETWORKS.mainnet.id ? 'BOT Chain Mainnet' : `chain ${wallet.chainId}`}. Switch to BOT Chain Testnet.`, '<button class="pill pill-dark sm" data-act="switch">Switch to Testnet</button>'],
+      chain: [`You're on ${wallet.chainId === NETWORKS.testnet.id ? 'BOT Chain Testnet' : `chain ${wallet.chainId}`}. The lessons run on BOT Chain Mainnet.`, '<button class="pill pill-dark sm" data-act="switch">Switch to Mainnet</button>'],
       locked: [`Finish lesson ${n - 1} first.`, `<a class="pill pill-dark sm" href="/lesson/${n - 1}">Go to lesson ${n - 1}</a>`],
-      gas: ['Your wallet has no test BOT, so it can\'t pay for gas.', `<a class="pill pill-soft sm" href="${LINKS.faucet}" target="_blank" rel="noopener">Open faucet</a><button class="pill pill-dark sm" data-act="refresh">Check again</button>`],
+      gas: ['Your wallet has no BOT on mainnet, so it can\'t pay for gas.', `<a class="pill pill-soft sm" href="${LINKS.botchain}" target="_blank" rel="noopener">Get BOT</a><button class="pill pill-dark sm" data-act="refresh">Check again</button>`],
     }[b.k];
     if (n === 1 && ['chain', 'gas'].includes(b.k)) return '';
     return `<div class="banner" role="status"><span>${m[0]}</span><span class="b-btns">${m[1]}</span></div>`;
@@ -176,13 +176,13 @@ export function lessonView(root, n) {
 
   const myCounter = () => st.counter || st.savedCounter;
   const TX = {
-    checkin: () => ({ to: TESTNET_PROGRESS, fn: 'checkIn()', data: PI.encodeFunctionData('checkIn') }),
-    tip: () => ({ to: TESTNET_PROGRESS, fn: 'tip()', data: PI.encodeFunctionData('tip'), value: parseEther('0.001') }),
-    hello: () => ({ to: TESTNET_PROGRESS, fn: 'sayHello(string name)', data: PI.encodeFunctionData('sayHello', ['First Block']) }),
+    checkin: () => ({ to: PROGRESS_CONTRACT, fn: 'checkIn()', data: PI.encodeFunctionData('checkIn') }),
+    tip: () => ({ to: PROGRESS_CONTRACT, fn: 'tip()', data: PI.encodeFunctionData('tip'), value: parseEther('0.001') }),
+    hello: () => ({ to: PROGRESS_CONTRACT, fn: 'sayHello(string name)', data: PI.encodeFunctionData('sayHello', ['First Block']) }),
     deploy: () => lv.cj && { to: null, fn: 'constructor()', data: lv.cj.bytecode },
-    submit: () => myCounter() && { to: TESTNET_PROGRESS, fn: 'submitCounter(address c)', data: PI.encodeFunctionData('submitCounter', [myCounter()]) },
+    submit: () => myCounter() && { to: PROGRESS_CONTRACT, fn: 'submitCounter(address c)', data: PI.encodeFunctionData('submitCounter', [myCounter()]) },
     inc: () => st.counter && { to: st.counter, fn: 'increment()', data: CI.encodeFunctionData('increment') },
-    finish: () => ({ to: TESTNET_PROGRESS, fn: 'finishCounter()', data: PI.encodeFunctionData('finishCounter') }),
+    finish: () => ({ to: PROGRESS_CONTRACT, fn: 'finishCounter()', data: PI.encodeFunctionData('finishCounter') }),
   };
   const TX_OF = { 1: ['checkin'], 2: ['tip'], 3: ['hello'], 4: ['deploy', 'submit'], 5: ['inc', 'finish'] }[n];
   const gasText = (k) => {
@@ -192,14 +192,14 @@ export function lessonView(root, n) {
     if (g == null) return 'Can\'t estimate yet, it would fail right now';
     return `${num(g)} gas${lv.price ? ` ≈ ${tbot(g * lv.price)}` : ''}`;
   };
-  const toName = (a) => (a === TESTNET_PROGRESS ? `Progress ${link('testnet', 'address', a)}` : `Your Counter ${link('testnet', 'address', a)}`);
+  const toName = (a) => (a === PROGRESS_CONTRACT ? `First Block ${link(LESSON_NET, 'address', a)}` : `Your Counter ${link(LESSON_NET, 'address', a)}`);
   const previewInner = (k) => {
     const t = TX[k]();
     if (!t) return '';
     return `<p class="sign-h">${icon('pen', 'xs')}You're about to sign</p><dl>
       ${kv('Contract', t.to ? toName(t.to) : 'None. This creates a new one')}
       ${kv('Function', `<code>${t.fn}</code>`)}
-      ${kv('Sends', t.value ? '0.001 test BOT' : 'No BOT, only the gas fee')}
+      ${kv('Sends', t.value ? '0.001 BOT' : 'No BOT, only the gas fee')}
       ${kv('Gas fee', gasText(k))}</dl>`;
   };
   const preview = (k) => `<div class="sign" data-pv="${k}">${previewInner(k)}</div>`;
@@ -209,7 +209,7 @@ export function lessonView(root, n) {
     address: () => `<dl>${kv('Your address', st.addr ? `<code class="brk">${st.addr}</code>` : '<span class="dim">Connect your wallet to see it</span>')}
       ${kv('Address', '<span class="lt ok">Public</span> share it to receive BOT')}
       ${kv('Recovery phrase', '<span class="lt no">Secret</span> never type it into a website')}</dl>`,
-    networks: () => `<dl>${['testnet', 'mainnet'].map((w) => kv(NETWORKS[w].name, `<code>chain ID ${NETWORKS[w].id}</code> · ${w === 'testnet' ? 'free test coins, lessons 1 to 5' : 'real BOT, graduation'}${wallet.chainId === NETWORKS[w].id ? ' <span class="lt ok">You are here</span>' : ''}`)).join('')}
+    networks: () => `<dl>${['testnet', 'mainnet'].map((w) => kv(NETWORKS[w].name, `<code>chain ID ${NETWORKS[w].id}</code> · ${w === 'testnet' ? 'free practice coins from a faucet' : 'real BOT, lessons 1 to 5 and graduation'}${wallet.chainId === NETWORKS[w].id ? ' <span class="lt ok">You are here</span>' : ''}`)).join('')}
       ${wallet.chainId && ![968, 677].includes(wallet.chainId) ? kv('Your wallet', `<span class="lt no">chain ${wallet.chainId}</span> another network`) : ''}</dl>`,
     gasprice: () => `<dl>${kv('Gas price now', lv.price != null ? `<code>${Number(formatUnits(lv.price, 'gwei')).toLocaleString('en-US', { maximumFractionDigits: 3 })} gwei</code>` : '…')}
       ${kv('Check in will use', gasText('checkin'))}
@@ -217,8 +217,8 @@ export function lessonView(root, n) {
     anatomy: () => {
       const t = TX.tip();
       return `<dl>${kv('from', st.addr ? `<code>${short(st.addr)}</code> you` : '<span class="dim">your address</span>')}
-        ${kv('to', `<code>${short(t.to)}</code> the Progress contract`)}
-        ${kv('value', '<code>0.001</code> test BOT')}
+        ${kv('to', `<code>${t.to ? short(t.to) : 'not deployed yet'}</code> the First Block contract`)}
+        ${kv('value', '<code>0.001</code> BOT')}
         ${kv('data', `<code>${t.data}</code> = tip()`)}
         ${kv('nonce', lv.nonce != null ? `<code>${lv.nonce}</code> transactions sent before this one` : st.addr ? '…' : '<span class="dim">connect to see yours</span>')}
         ${kv('gas', gasText('tip'))}</dl><p class="lw-note">MetaMask shows these same fields when you confirm.</p>`;
@@ -233,7 +233,7 @@ export function lessonView(root, n) {
       <p class="lw-note">keccak256 of the signature, first 4 bytes. That is all the contract sees.</p>`,
     read: () => {
       const r = lv.read;
-      return `<div class="lw-act"><button class="pill pill-soft sm" data-act="read-prog"${st.addr && TESTNET_PROGRESS ? '' : ' disabled'}><code>progressOf(you)</code></button><span class="dim">${st.addr ? 'Press to read. No pop-up will open.' : 'Connect your wallet first.'}</span></div>
+      return `<div class="lw-act"><button class="pill pill-soft sm" data-act="read-prog"${st.addr && PROGRESS_CONTRACT ? '' : ' disabled'}><code>progressOf(you)</code></button><span class="dim">${st.addr ? 'Press to read. No pop-up will open.' : 'Connect your wallet first.'}</span></div>
         ${r ? `<dl>${r.err ? kv('Result', '<span class="lt no">RPC busy</span> try again') : `${kv('Lessons passed', `<code>${r.done} of 5</code>`)}${kv('Flags', `<code>${r.flags.toString(2).padStart(5, '0')}</code> one bit per lesson, read right to left`)}`}
           ${kv('Took', `${r.ms} ms`)}${kv('Signature', 'none')}${kv('Gas', '0, free')}</dl>` : ''}`;
     },
@@ -241,7 +241,7 @@ export function lessonView(root, n) {
       const h = hellos[0];
       return `<dl>${kv('Event', '<code>Hello(address learner, string name)</code>')}
         ${kv('Topic', `<code>${short(PI.getEvent('Hello').topicHash)}</code> its ID in the logs`)}
-        ${kv('Latest one', h ? `<b>${esc(h.name)}</b> from <code>${short(h.who)}</code>${h.block ? ` in block ${h.hash ? link('testnet', 'tx', h.hash, `#${num(h.block)}`) : `#${num(h.block)}`}` : ''}` : '<span class="dim">none yet, yours can be the first</span>')}</dl>`;
+        ${kv('Latest one', h ? `<b>${esc(h.name)}</b> from <code>${short(h.who)}</code>${h.block ? ` in block ${h.hash ? link(LESSON_NET, 'tx', h.hash, `#${num(h.block)}`) : `#${num(h.block)}`}` : ''}` : '<span class="dim">none yet, yours can be the first</span>')}</dl>`;
     },
     bytecode: () => {
       const c = lv.cj;
@@ -269,7 +269,7 @@ export function lessonView(root, n) {
     $$('[data-pv]', root).forEach((e) => { e.innerHTML = previewInner(e.dataset.pv); });
   };
   const loadLive = async () => {
-    const p = provider('testnet'), a = st.addr;
+    const p = provider(LESSON_NET), a = st.addr;
     if (n === 4) { try { lv.cj ??= await loadCounter(); } catch { /* bytecode is optional here */ } }
     const jobs = [withRetry(() => p.getFeeData()).then((f) => { lv.price = f.gasPrice; })];
     if (a) {
@@ -286,7 +286,7 @@ export function lessonView(root, n) {
   };
   const tickBlock = async () => {
     try {
-      const b = await provider('testnet').getBlockNumber();
+      const b = await provider(LESSON_NET).getBlockNumber();
       if (!alive) return;
       lv.block = b; lv.b0 ??= { n: b, t: performance.now() };
       const e = $('[data-w="blocks"]', root);
@@ -294,7 +294,7 @@ export function lessonView(root, n) {
     } catch { /* next tick */ }
   };
 
-  const learnHTML = () => `<p class="muted lv-lead">${n === 1 ? 'Three ideas first. ' : ''}The boxes read live from BOT Chain testnet. None of them asks you to sign.</p>
+  const learnHTML = () => `<p class="muted lv-lead">${n === 1 ? 'Three ideas first. ' : ''}The boxes read live from BOT Chain. None of them asks you to sign.</p>
     <div class="learn">${L.learn.map((c, i) => `<article class="lc"><span class="lc-n">${i + 1}</span><div class="lc-b"><h3>${c.t}</h3><p class="muted">${c.b}</p>${c.w ? `<div class="lw" data-w="${c.w}">${W[c.w]()}</div>` : ''}</div></article>`).join('')}</div>`;
   const ideasHTML = () => `<ul class="ideas">${L.ideas.map((t) => `<li>${icon('check', 'sm')}<span>${t}</span></li>`).join('')}</ul>`;
 
@@ -302,13 +302,13 @@ export function lessonView(root, n) {
     const S = [];
     if (n === 1) {
       S.push(`<li class="${hasWallet() ? 'ok' : ''}"><b>Install MetaMask</b><span class="muted">It's the wallet app that holds your address and signs for you. <a class="link-under" href="https://metamask.io/download/" target="_blank" rel="noopener">Install MetaMask</a>. Already have it? Skip ahead.</span></li>`);
-      S.push(`<li class="${wallet.chainId === 968 ? 'ok' : ''}"><b>Add BOT Chain Testnet</b><span class="muted">One click adds the network (chain ID 968).</span><span class="row-a"><button class="pill pill-dark sm" data-act="add-net"${hasWallet() ? '' : ' disabled'}>${wallet.chainId === 968 ? 'Network added' : 'Add network'}</button></span>${stat('net')}</li>`);
-      S.push(`<li class="${st.bal > 0n ? 'ok' : ''}"><b>Get free test BOT</b><span class="muted">The faucet gives 10 test BOT per address every 24 hours.${st.addr ? ` Your balance: <b>${st.bal != null ? fmtBal(st.bal) : '…'}</b>.` : ''}</span><span class="row-a"><a class="pill pill-soft sm" href="${LINKS.faucet}" target="_blank" rel="noopener">Open faucet</a><button class="pill pill-soft sm" data-act="refresh">Check again</button></span></li>`);
-      S.push(`<li class="${done() ? 'ok' : ''}"><b>Check in</b><span class="muted">The contract will look at your balance. If you have test BOT to pay for gas, you're set up.</span>${preview('checkin')}<span class="row-a"><button class="pill pill-dark big" data-act="tx-checkin"${dis()}>${done() ? 'Check in again' : 'Check in'}</button></span>${stat('tx')}</li>`);
+      S.push(`<li class="${wallet.chainId === NETWORKS[LESSON_NET].id ? 'ok' : ''}"><b>Add BOT Chain Mainnet</b><span class="muted">One click adds the network (chain ID ${NETWORKS[LESSON_NET].id}). The lessons run here, so each step costs a tiny gas fee in real BOT.</span><span class="row-a"><button class="pill pill-dark sm" data-act="add-net"${hasWallet() ? '' : ' disabled'}>${wallet.chainId === NETWORKS[LESSON_NET].id ? 'Network added' : 'Add network'}</button></span>${stat('net')}</li>`);
+      S.push(`<li class="${st.bal > 0n ? 'ok' : ''}"><b>Get a little BOT for gas</b><span class="muted">The whole course needs about 0.01 BOT in gas.${st.addr ? ` Your balance: <b>${st.bal != null ? fmtBal(st.bal) : '…'}</b>.` : ''} Want to practise with free coins first? BOT Chain Testnet has a <a class="link-under" href="${LINKS.faucet}" target="_blank" rel="noopener">faucet</a>.</span><span class="row-a"><a class="pill pill-soft sm" href="${LINKS.botchain}" target="_blank" rel="noopener">Get BOT</a><button class="pill pill-soft sm" data-act="refresh">Check again</button></span></li>`);
+      S.push(`<li class="${done() ? 'ok' : ''}"><b>Check in</b><span class="muted">The contract will look at your balance. If you have BOT to pay for gas, you're set up.</span>${preview('checkin')}<span class="row-a"><button class="pill pill-dark big" data-act="tx-checkin"${dis()}>${done() ? 'Check in again' : 'Check in'}</button></span>${stat('tx')}</li>`);
     }
     if (n === 2) {
-      S.push(`<li class="${tx ? 'ok' : ''}"><b>Send 0.001 test BOT</b><span class="muted">Press Send and confirm in MetaMask. The contract records your tip.</span>${preview('tip')}<span class="row-a"><button class="pill pill-dark big" data-act="tx-tip"${dis()}>${done() ? 'Send again' : 'Send 0.001 test BOT'}</button></span>${stat('tx')}</li>`);
-      S.push(`<li class="${tx ? 'ok' : ''}"><b>Open it on the explorer</b><span class="muted">${tx ? `Find your three numbers: hash, block and gas. <a class="link-under" href="${NETWORKS.testnet.explorer}/tx/${tx.hash}" target="_blank" rel="noopener">Open on scan.bohr.life</a>` : 'The link appears after your transaction.'}</span></li>`);
+      S.push(`<li class="${tx ? 'ok' : ''}"><b>Send 0.001 BOT</b><span class="muted">Press Send and confirm in MetaMask. The contract records your tip.</span>${preview('tip')}<span class="row-a"><button class="pill pill-dark big" data-act="tx-tip"${dis()}>${done() ? 'Send again' : 'Send 0.001 BOT'}</button></span>${stat('tx')}</li>`);
+      S.push(`<li class="${tx ? 'ok' : ''}"><b>Open it on the explorer</b><span class="muted">${tx ? `Find your three numbers: hash, block and gas. <a class="link-under" href="${NETWORKS[LESSON_NET].explorer}/tx/${tx.hash}" target="_blank" rel="noopener">Open on scan.botchain.ai</a>` : 'The link appears after your transaction.'}</span></li>`);
       S.push(`<li class="${Object.keys(quizDone).length === 3 ? 'ok' : ''}"><b>Answer three questions</b>${tx ? `<span class="quiz">${QUIZ(tx).map((q, i) => `<span class="q-block"><span class="q-t">${q.q}</span><span class="q-o">${q.opts.map((o) => `<button class="opt ${quizDone[i] === o ? (o === q.right ? 'right' : 'wrong') : ''}" data-act="quiz" data-q="${i}" data-o="${esc(o)}">${esc(o)}</button>`).join('')}</span></span>`).join('')}</span>` : '<span class="muted">Uses your own transaction, so send it first.</span>'}</li>`);
     }
     if (n === 3) {
@@ -318,12 +318,12 @@ export function lessonView(root, n) {
     if (n === 4) {
       S.push(`<li class="ok"><b>Read the contract</b><span class="muted">Hover or tap a line to see what it does.</span><span class="code-in">${CODE.map(([l], i) => `<span class="cl" data-act="line" data-i="${i}" tabindex="0"><i>${i + 1}</i><code>${esc(l).replace(/ /g, '&nbsp;')}</code></span>`).join('')}</span><span class="cl-note" id="clNote">Hover a line.</span></li>`);
       const c = st.counter || st.savedCounter;
-      S.push(`<li class="${c ? 'ok' : ''}"><b>Deploy your Counter</b><span class="muted">Your wallet creates a new contract. You become its owner.${c ? ` Your Counter: ${link('testnet', 'address', c)}` : ''}</span>${preview('deploy')}<span class="row-a"><button class="pill pill-dark big" data-act="deploy"${dis()}>${c ? 'Deploy another' : 'Deploy my Counter'}</button></span>${stat('deploy')}</li>`);
-      S.push(`<li class="${done() ? 'ok' : ''}"><b>Submit it for checking</b><span class="muted">The Progress contract checks the code and that you are the owner.</span>${preview('submit')}<span class="row-a"><button class="pill pill-dark big" data-act="submit"${c ? dis() : ' disabled aria-disabled="true"'}>Submit my Counter</button></span>${stat('tx')}</li>`);
+      S.push(`<li class="${c ? 'ok' : ''}"><b>Deploy your Counter</b><span class="muted">Your wallet creates a new contract. You become its owner.${c ? ` Your Counter: ${link(LESSON_NET, 'address', c)}` : ''}</span>${preview('deploy')}<span class="row-a"><button class="pill pill-dark big" data-act="deploy"${dis()}>${c ? 'Deploy another' : 'Deploy my Counter'}</button></span>${stat('deploy')}</li>`);
+      S.push(`<li class="${done() ? 'ok' : ''}"><b>Submit it for checking</b><span class="muted">The First Block contract checks the code and that you are the owner.</span>${preview('submit')}<span class="row-a"><button class="pill pill-dark big" data-act="submit"${c ? dis() : ' disabled aria-disabled="true"'}>Submit my Counter</button></span>${stat('tx')}</li>`);
     }
     if (n === 5) {
       const c = st.counter;
-      S.push(`<li class="${c ? 'ok' : ''}"><b>Your Counter</b><span class="muted">${c ? `${link('testnet', 'address', c)} · count is <b id="cnt">${liveCount ?? '…'}</b> <button class="link-under" data-act="read">Read again</button> <span class="dim">(free, a view call)</span>` : 'Submit a Counter in lesson 4 first.'}</span></li>`);
+      S.push(`<li class="${c ? 'ok' : ''}"><b>Your Counter</b><span class="muted">${c ? `${link(LESSON_NET, 'address', c)} · count is <b id="cnt">${liveCount ?? '…'}</b> <button class="link-under" data-act="read">Read again</button> <span class="dim">(free, a view call)</span>` : 'Submit a Counter in lesson 4 first.'}</span></li>`);
       S.push(`<li class="${liveCount >= 3 ? 'ok' : ''}"><b>Press increment() three times</b><span class="muted">Each press is its own transaction. Watch the number go up.</span>${preview('inc')}<span class="row-a"><button class="pill pill-dark big" data-act="inc"${c ? dis() : ' disabled aria-disabled="true"'}>increment()</button></span>${stat('inc')}</li>`);
       S.push(`<li class="${done() ? 'ok' : ''}"><b>Finish the lesson</b><span class="muted">The contract reads count() from your Counter and wants at least 3.</span>${preview('finish')}<span class="row-a"><button class="pill pill-dark big" data-act="tx-finish"${dis()}>${done() ? 'Check again' : 'Finish lesson 5'}</button></span>${stat('tx2')}</li>`);
     }
@@ -335,7 +335,7 @@ export function lessonView(root, n) {
     if (c.s === 'busy') return '<p class="chk busy"><span class="spin"></span>Checking the chain…</p>';
     if (c.s === 'ok' || done()) return `<p class="chk ok">${icon('check')}<span><b>Passed.</b> The contract confirmed lesson ${n}.${c.xp ? ` <span class="xp-pill">+${c.xp} XP</span>` : ''}</span></p>${tx || st.txMeta ? '' : ''}`;
     if (c.s === 'no') return `<p class="chk no"><b>✗ Not yet.</b><span>${c.hint}</span></p><button class="pill pill-soft sm" data-act="check">Try again</button>`;
-    if (c.s === 'err') return '<p class="chk no"><b>Couldn\'t reach the chain.</b><span>The testnet RPC is slow right now.</span></p><button class="pill pill-soft sm" data-act="check">Retry</button>';
+    if (c.s === 'err') return '<p class="chk no"><b>Couldn\'t reach the chain.</b><span>The BOT Chain RPC is slow right now.</span></p><button class="pill pill-soft sm" data-act="check">Retry</button>';
     return '<p class="chk idle">Finish the steps above, then the chain checks you. You can also press the button.</p><button class="pill pill-soft sm" data-act="check">Check the chain</button>';
   };
 
@@ -346,7 +346,7 @@ export function lessonView(root, n) {
     const dash = '<span class="dim">—</span>';
     return `<div class="happened"><p class="muted">${L.happened}</p>
       <div class="flow ${t ? '' : 'empty'}">
-        <div class="fl-row">${node('wallet', 'Your wallet', st.addr ? `<code>${short(st.addr)}</code>` : dash, 'signed it')}<i class="fl-ar" aria-hidden="true"></i>${node('send', 'Transaction', t ? link('testnet', 'tx', t.hash) : dash, `called ${fn}`)}<i class="fl-ar" aria-hidden="true"></i>${node('cube', 'Block', t ? `<code>#${num(t.block)}</code>` : dash, 'final from here')}</div>
+        <div class="fl-row">${node('wallet', 'Your wallet', st.addr ? `<code>${short(st.addr)}</code>` : dash, 'signed it')}<i class="fl-ar" aria-hidden="true"></i>${node('send', 'Transaction', t ? link(LESSON_NET, 'tx', t.hash) : dash, `called ${fn}`)}<i class="fl-ar" aria-hidden="true"></i>${node('cube', 'Block', t ? `<code>#${num(t.block)}</code>` : dash, 'final from here')}</div>
         ${t ? `<dl class="fl-foot">${kv('Gas used', `<code>${num(t.gas)}</code>`)}${kv('Fee paid', t.fee != null ? tbot(t.fee) : '…')}</dl>` : '<p class="fl-wait">Your own wallet, transaction and block show up here once you finish this lesson.</p>'}
       </div></div>`;
   };
@@ -357,7 +357,7 @@ export function lessonView(root, n) {
     const next = n < 5 ? `<a class="pill pill-dark" href="/lesson/${n + 1}">Next: lesson ${n + 1}</a>` : '<a class="pill pill-dark" href="/graduate">Next: graduate</a>';
     root.innerHTML = `<div class="v-wrap lv"><div class="lv-main"><a class="back" href="/learn">${icon('chev', 'back-ic')} All lessons</a>
       <p class="eyebrow">Lesson ${n} · ${L.title}</p><h1 class="v-title">${L.headline}</h1>
-      ${done() ? `<p class="done-note">${icon('check', 'sm')}<span>You passed this lesson.${tx ? ` <a class="link-under" href="${NETWORKS.testnet.explorer}/tx/${tx.hash}" target="_blank" rel="noopener">View your transaction</a>.` : ''} You can redo it for practice.</span></p>` : ''}
+      ${done() ? `<p class="done-note">${icon('check', 'sm')}<span>You passed this lesson.${tx ? ` <a class="link-under" href="${NETWORKS[LESSON_NET].explorer}/tx/${tx.hash}" target="_blank" rel="noopener">View your transaction</a>.` : ''} You can redo it for practice.</span></p>` : ''}
       <section class="lv-sec"><h2>Why it matters</h2><p class="muted">${L.why}</p><p class="tip">${icon('shield', 'sm')}<span>${L.tip}</span></p></section>
       <section class="lv-sec"><h2>Learn</h2>${learnHTML()}</section>
       <section class="lv-sec"><h2>Do it</h2>${bannerHTML()}<ol class="steps-l">${stepsHTML()}</ol></section>
@@ -373,7 +373,7 @@ export function lessonView(root, n) {
   const setStat = (id, kind, html) => { const e = $(`[data-s="${id}"]`, root); if (e) { e.className = `txs ${kind}`; e.innerHTML = html; } };
   const uiFor = (id) => (stage, data) => {
     if (stage === 'wallet') setStat(id, 'busy', '<span class="spin"></span>Confirm in MetaMask…');
-    if (stage === 'pending') setStat(id, 'busy', `<span class="spin"></span>Waiting for the block… ${link('testnet', 'tx', data)}`);
+    if (stage === 'pending') setStat(id, 'busy', `<span class="spin"></span>Waiting for the block… ${link(LESSON_NET, 'tx', data)}`);
     if (stage === 'done') setStat(id, 'ok', `${icon('check', 'sm')} Confirmed in block #${data.blockNumber}`);
   };
 
@@ -382,7 +382,7 @@ export function lessonView(root, n) {
     if (!alive) return;
     st = s;
     if (st.addr && done() && !tx) { try { const m = (await loadTxs(st.addr))[n]; if (m) { tx = await receiptInfo(m.hash); } } catch { /* optional */ } }
-    if (n === 5 && st.counter) { try { liveCount = Number(await withRetry(() => new Contract(st.counter, COUNTER_ABI, provider('testnet')).count())); } catch { /* keep */ } }
+    if (n === 5 && st.counter) { try { liveCount = Number(await withRetry(() => new Contract(st.counter, COUNTER_ABI, provider(LESSON_NET)).count())); } catch { /* keep */ } }
     if (n === 3) await pullHellos();
     draw();
     loadLive();
@@ -391,16 +391,16 @@ export function lessonView(root, n) {
   const pullHellos = async () => {
     const p = progressRead();
     if (!p) return;
-    try { const logs = await withRetry(() => p.queryFilter(p.filters.Hello(), TESTNET_START_BLOCK, 'latest')); hellos = logs.slice(-6).reverse().map((l) => ({ name: l.args.name, who: l.args.learner, block: l.blockNumber, hash: l.transactionHash })); } catch { /* keep the previous list */ }
+    try { const logs = await withRetry(() => p.queryFilter(p.filters.Hello(), PROGRESS_START_BLOCK, 'latest')); hellos = logs.slice(-6).reverse().map((l) => ({ name: l.args.name, who: l.args.learner, block: l.blockNumber, hash: l.transactionHash })); } catch { /* keep the previous list */ }
   };
 
   const diagnose = async () => {
-    if (n === 1) return st.bal === 0n ? 'Your wallet has no test BOT yet. Get some from the faucet, then press Check in.' : 'Press Check in so the contract can look at your wallet.';
-    if (n === 2) return !has(st.prog.flags, 1) ? 'Pass lesson 1 first.' : 'We didn\'t see a tip of at least 0.001 test BOT yet. Press Send.';
+    if (n === 1) return st.bal === 0n ? 'Your wallet has no BOT on mainnet yet. Get a little for gas, then press Check in.' : 'Press Check in so the contract can look at your wallet.';
+    if (n === 2) return !has(st.prog.flags, 1) ? 'Pass lesson 1 first.' : 'We didn\'t see a tip of at least 0.001 BOT yet. Press Send.';
     if (n === 3) return 'We haven\'t seen your hello yet. Type a name and press Say hello.';
     if (n === 4) return st.counter ? 'Your Counter is submitted. Press Check the chain again.' : st.savedCounter ? 'You deployed a Counter. Now press Submit my Counter.' : 'Deploy a Counter, then submit it.';
     if (!st.counter) return 'Submit a Counter in lesson 4 first.';
-    const c = Number(await withRetry(() => new Contract(st.counter, COUNTER_ABI, provider('testnet')).count()));
+    const c = Number(await withRetry(() => new Contract(st.counter, COUNTER_ABI, provider(LESSON_NET)).count()));
     liveCount = c;
     return c < 3 ? `We found your Counter, but count is ${c}. Press increment ${3 - c} more time${3 - c === 1 ? '' : 's'}.` : 'Your count is 3 or more. Press Finish lesson 5.';
   };
@@ -427,8 +427,8 @@ export function lessonView(root, n) {
 
   const actions = {
     connect: () => connect().catch((e) => toast(explain(e))),
-    switch: () => switchTo('testnet').catch((e) => toast(explain(e))),
-    'add-net': async () => { try { await switchTo('testnet'); } catch (e) { setStat('net', 'err', esc(explain(e))); } },
+    switch: () => switchTo(LESSON_NET).catch((e) => toast(explain(e))),
+    'add-net': async () => { try { await switchTo(LESSON_NET); } catch (e) { setStat('net', 'err', esc(explain(e))); } },
     refresh: () => refresh(),
     stuck: () => { stuck = !stuck; draw(); },
     check: () => runCheck(),
@@ -440,18 +440,18 @@ export function lessonView(root, n) {
     },
     quiz: (b) => { const q = QUIZ(tx)[+b.dataset.q]; quizDone[+b.dataset.q] = b.dataset.o; if (b.dataset.o !== q.right) { delete quizDone[+b.dataset.q]; b.classList.add('wrong'); setTimeout(() => b.classList.remove('wrong'), 900); } else draw(); },
     line: (b) => { const i = +b.dataset.i; $$('.cl', root).forEach((x) => x.classList.toggle('on', x === b)); $('#clNote', root).textContent = CODE[i][1] || 'Just structure.'; },
-    'tx-checkin': (b) => act(b, 'tx', (ui) => runTx('testnet', (s) => new Contract(TESTNET_PROGRESS, PROGRESS_ABI, s).checkIn(), ui).then(afterTx)),
-    'tx-tip': (b) => act(b, 'tx', (ui) => runTx('testnet', (s) => new Contract(TESTNET_PROGRESS, PROGRESS_ABI, s).tip({ value: parseEther('0.001') }), ui).then(afterTx)),
-    'tx-hello': (b) => { const name = $('#helloName', root).value.trim(); if (!name || name.length > 24) return setStat('tx', 'err', 'Type a name between 1 and 24 characters.'); return act(b, 'tx', (ui) => runTx('testnet', (s) => new Contract(TESTNET_PROGRESS, PROGRESS_ABI, s).sayHello(name), ui).then(afterTx)); },
+    'tx-checkin': (b) => act(b, 'tx', (ui) => runTx(LESSON_NET, (s) => new Contract(PROGRESS_CONTRACT, PROGRESS_ABI, s).checkIn(), ui).then(afterTx)),
+    'tx-tip': (b) => act(b, 'tx', (ui) => runTx(LESSON_NET, (s) => new Contract(PROGRESS_CONTRACT, PROGRESS_ABI, s).tip({ value: parseEther('0.001') }), ui).then(afterTx)),
+    'tx-hello': (b) => { const name = $('#helloName', root).value.trim(); if (!name || name.length > 24) return setStat('tx', 'err', 'Type a name between 1 and 24 characters.'); return act(b, 'tx', (ui) => runTx(LESSON_NET, (s) => new Contract(PROGRESS_CONTRACT, PROGRESS_ABI, s).sayHello(name), ui).then(afterTx)); },
     deploy: (b) => act(b, 'deploy', async (ui) => {
       lv.deployPred = predicted();
       const cj = await loadCounter();
-      const r = await runTx('testnet', async (s) => { const f = new ContractFactory(cj.abi, cj.bytecode, s); const d = await f.deploy(); return d.deploymentTransaction(); }, ui);
+      const r = await runTx(LESSON_NET, async (s) => { const f = new ContractFactory(cj.abi, cj.bytecode, s); const d = await f.deploy(); return d.deploymentTransaction(); }, ui);
       saveCounter(wallet.address, r.contractAddress);
     }, false),
-    submit: (b) => act(b, 'tx', (ui) => runTx('testnet', (s) => new Contract(TESTNET_PROGRESS, PROGRESS_ABI, s).submitCounter(st.counter || st.savedCounter), ui).then(afterTx)),
-    inc: (b) => act(b, 'inc', async (ui) => { await runTx('testnet', (s) => new Contract(st.counter, COUNTER_ABI, s).increment(), ui); await refresh(); }, false),
-    'tx-finish': (b) => act(b, 'tx2', (ui) => runTx('testnet', (s) => new Contract(TESTNET_PROGRESS, PROGRESS_ABI, s).finishCounter(), ui).then(afterTx)),
+    submit: (b) => act(b, 'tx', (ui) => runTx(LESSON_NET, (s) => new Contract(PROGRESS_CONTRACT, PROGRESS_ABI, s).submitCounter(st.counter || st.savedCounter), ui).then(afterTx)),
+    inc: (b) => act(b, 'inc', async (ui) => { await runTx(LESSON_NET, (s) => new Contract(st.counter, COUNTER_ABI, s).increment(), ui); await refresh(); }, false),
+    'tx-finish': (b) => act(b, 'tx2', (ui) => runTx(LESSON_NET, (s) => new Contract(PROGRESS_CONTRACT, PROGRESS_ABI, s).finishCounter(), ui).then(afterTx)),
   };
   const afterTx = async (receipt) => { tx = { hash: receipt.hash, block: receipt.blockNumber, gas: receipt.gasUsed.toString(), fee: receipt.fee }; };
 

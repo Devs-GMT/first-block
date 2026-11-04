@@ -1,4 +1,4 @@
-import { MAINNET_CONTRACT, TESTNET_PROGRESS, TESTNET_START_BLOCK, LINKS } from './config.js';
+import { MAINNET_CONTRACT, PROGRESS_CONTRACT, PROGRESS_START_BLOCK, LESSON_NET, LINKS } from './config.js';
 import { NETWORKS, connect, disconnect, hasWallet, isAddress, onWallet, progressRead, graduationRead, scanWallet, short, switchTo, wallet, withRetry } from './chain.js';
 
 const $ = (s, r = document) => r.querySelector(s);
@@ -79,8 +79,8 @@ export function initScan() {
     const tok = ++run;
     note.className = 'search-note'; note.textContent = '';
     panel.hidden = false;
-    panel.innerHTML = `<div class="s-head"><b class="mono">${short(addr)}</b><span class="chip">BOT Chain Testnet</span></div>
-      <ul class="s-list">${rowHTML('found', 'Wallet address')}${rowHTML('balance', 'Test BOT balance')}${rowHTML('txs', 'Transactions sent')}${rowHTML('done', 'Lessons passed')}${rowHTML('graduate', 'Graduated on mainnet')}</ul>
+    panel.innerHTML = `<div class="s-head"><b class="mono">${short(addr)}</b><span class="chip">BOT Chain Mainnet</span></div>
+      <ul class="s-list">${rowHTML('found', 'Wallet address')}${rowHTML('balance', 'BOT balance')}${rowHTML('txs', 'Transactions sent')}${rowHTML('done', 'Lessons passed')}${rowHTML('graduate', 'Graduated on mainnet')}</ul>
       <div class="s-blocks"></div><div class="s-foot"></div>`;
     let lastDone = null;
     drawBlocks(null);
@@ -89,7 +89,7 @@ export function initScan() {
     const res = await scanWallet(addr, (key, val) => {
       if (tok !== run) return;
       if (val === undefined) { failed = true; return setRow(key, 'err', 'Couldn\'t read'); }
-      if (key === 'balance') setRow(key, 'ok', `${Number(val).toLocaleString('en-US', { maximumFractionDigits: 4 })} tBOT`);
+      if (key === 'balance') setRow(key, 'ok', `${Number(val).toLocaleString('en-US', { maximumFractionDigits: 4 })} BOT`);
       if (key === 'txs') setRow(key, 'ok', String(val));
       if (key === 'done') { if (val === null) setRow(key, 'na', 'Contract not live yet'); else { lastDone = val.count; setRow(key, 'ok', `${val.count} of 5`); drawBlocks(val.count); } }
       if (key === 'graduate') { if (val === null) setRow(key, 'na', 'Contract not live yet'); else { setRow(key, 'ok', val ? 'Yes' : 'Not yet'); } }
@@ -98,7 +98,7 @@ export function initScan() {
     const foot = $('.s-foot', panel);
     if (failed) foot.innerHTML = '<button class="link-under" data-retry>Retry the failed reads</button>';
     else if (res.done && res.done.count === 5) foot.textContent = 'All five lessons passed. This wallet can graduate on mainnet.';
-    else if (!res.done) foot.textContent = 'Lesson progress is read from the Progress contract, which isn\'t deployed yet.';
+    else if (!res.done) foot.textContent = 'Lesson progress is read from the First Block contract, which isn\'t deployed yet.';
     else foot.innerHTML = `<a class="link-under" href="/lesson/${Math.min(res.done.count + 1, 5)}">Continue with lesson ${Math.min(res.done.count + 1, 5)}</a>`;
     $('[data-retry]', panel)?.addEventListener('click', () => check(addr));
   };
@@ -119,17 +119,17 @@ export async function initWall() {
   const p = progressRead();
   if (!list || !p) return false;
   $('#wallState').textContent = 'Live';
-  $('#wallFoot').textContent = 'Read straight from the Hello events of the Progress contract on BOT Chain testnet.';
+  $('#wallFoot').textContent = 'Read straight from the Hello events of the First Block contract on BOT Chain mainnet.';
   const draw = (items) => {
     list.innerHTML = items.length
       ? items.map((h) => `<li><b>${esc(h.name)}</b><span class="mono">${short(h.who)}</span></li>`).join('')
       : '<li class="empty"><b>No hellos yet</b><span class="mono">be the first</span></li>';
   };
   const pull = async () => {
-    const logs = await withRetry(() => p.queryFilter(p.filters.Hello(), TESTNET_START_BLOCK || 0, 'latest'));
+    const logs = await withRetry(() => p.queryFilter(p.filters.Hello(), PROGRESS_START_BLOCK || 0, 'latest'));
     draw(logs.slice(-4).reverse().map((l) => ({ name: l.args.name, who: l.args.learner })));
   };
-  try { await pull(); } catch { $('#wallFoot').textContent = 'Couldn\'t reach the testnet RPC. Retrying…'; }
+  try { await pull(); } catch { $('#wallFoot').textContent = 'Couldn\'t reach the BOT Chain RPC. Retrying…'; }
   setInterval(() => pull().catch(() => {}), 10000);
   return true;
 }
@@ -147,12 +147,9 @@ export async function initGraduates() {
     if (!total) return;
     $('#gradTitle').textContent = `${total.toLocaleString('en-US')} builder${total === 1 ? '' : 's'} already took their first block.`;
     const page = await withRetry(() => g.getGrads(Math.max(0, total - 12), 12));
-    const p = progressRead();
     const cards = await Promise.all([...page].reverse().map(async (x, i) => {
-      let verified = false;
-      if (p) { try { verified = Number((await p.progressOf(x.wallet))[0]) === 5; } catch { /* leave Self-reported */ } }
       const date = new Date(Number(x[2]) * 1000).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-      return `<article class="grad-card"><div class="m-row"><code>${short(x.wallet)}</code><span class="chip ${verified ? '' : 'self'}">${verified ? '✓ Verified' : 'Self-reported'}</span></div><q>${x.note ? esc(x.note) : 'No note left.'}</q><span class="muted sm">${date}</span></article>`;
+      return `<article class="grad-card"><div class="m-row"><code>${short(x.wallet)}</code><span class="chip">✓ Verified</span></div><q>${x.note ? esc(x.note) : 'No note left.'}</q><span class="muted sm">${date}</span></article>`;
     }));
     holder.className = 'grads grad-row';
     holder.innerHTML = cards.join('');

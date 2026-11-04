@@ -6,9 +6,9 @@
 
 **Your first steps on BOT Chain, one block at a time.**
 
-Five short, hands-on lessons. You send real transactions from your own wallet, a contract checks each step on BOT Chain testnet, and every lesson unlocks the next. Finish all five, then graduate with one transaction on BOT Chain mainnet. First Block is a community project and is **not** official BOT Chain education.
+Five short, hands-on lessons. You send real transactions from your own wallet, a contract checks each step on BOT Chain mainnet, and every lesson unlocks the next. Finish all five, then graduate with one more transaction. Every step is a real transaction, so the whole course costs about 0.01 BOT in gas. First Block is a community project and is **not** official BOT Chain education.
 
-[Contract (mainnet)](https://scan.botchain.ai/address/0x52d3764C4300384f73E3E4Cd34bF942A5e60D472) | [Contract (testnet)](https://scan.bohr.life/address/0xAC67458c737AB0048193DA66512B8B418E355a7F) | [How it works](#how-it-works) | [Screens](#screenshots) | [Run it locally](#run-it-locally) | [Deploy](#deploy) | [Limits](#limits-said-plainly)
+[Contract (mainnet)](https://scan.botchain.ai/address/0x1Ee20De0867047AbaBE540F5cb86569E3ce17948) | [How it works](#how-it-works) | [Screens](#screenshots) | [Run it locally](#run-it-locally) | [Deploy](#deploy) | [Limits](#limits-said-plainly)
 
 ![Solidity](https://img.shields.io/badge/Solidity-0.8.20-363636?logo=solidity&logoColor=white)
 ![Hardhat tests](https://img.shields.io/badge/Hardhat%20tests-13%20passing-1fa971)
@@ -25,7 +25,7 @@ Five short, hands-on lessons. You send real transactions from your own wallet, a
 
 ## Screenshots
 
-App screens show a test wallet that passed all five lessons, before the Progress contract was redeployed clean. Its numbers are real, and the live contract starts from zero.
+App screens come from a local simulated BOT Chain mainnet (chain ID 677) running the same contract, with a throwaway wallet, because no real wallet has passed the course yet. The numbers on them are from that local chain. Landing screens come from the live site.
 
 <table>
 <tr>
@@ -38,7 +38,7 @@ App screens show a test wallet that passed all five lessons, before the Progress
 </tr>
 <tr>
 <td>Five blocks, then graduate. Each block shows your transaction and how many wallets finished it.</td>
-<td>Three short ideas per lesson, with boxes that read live from testnet. None of them asks you to sign.</td>
+<td>Three short ideas per lesson, with boxes that read live from BOT Chain. None of them asks you to sign.</td>
 </tr>
 <tr>
 <th>You're about to sign</th>
@@ -70,11 +70,11 @@ App screens show a test wallet that passed all five lessons, before the Progress
 </tr>
 <tr>
 <td><img src="docs/shots/app-graduate.jpg" alt="Graduate form with a note, a sign summary and a warning for a wallet with no BOT" /></td>
-<td><img src="docs/shots/app-wall.jpg" alt="The graduates wall, empty so far" /></td>
+<td><img src="docs/shots/app-wall.jpg" alt="The graduates wall with one Verified graduate" /></td>
 </tr>
 <tr>
-<td>One mainnet transaction with an optional note. A wallet with no mainnet BOT sees why it can't continue.</td>
-<td>Every graduate, read from the mainnet contract. No graduates yet.</td>
+<td>One more transaction with an optional note, a sign summary and the live gas fee. A wallet with no BOT sees why it can't continue.</td>
+<td>Every graduate, read from the contract. Each one is Verified, because the contract refuses wallets that skipped lessons.</td>
 </tr>
 </table>
 
@@ -110,13 +110,13 @@ App screens show a test wallet that passed all five lessons, before the Progress
 
 ## How it works
 
-1. Connect MetaMask. There is no sign-up and no database. Lessons run on BOT Chain testnet, with free test BOT from the [faucet](https://faucet.botchain.ai/basic).
+1. Connect MetaMask. There is no sign-up and no database. Lessons run on BOT Chain mainnet and need a little real BOT for gas, about 0.01 BOT for the whole course. BOT Chain Testnet, with its [faucet](https://faucet.botchain.ai/basic), is the free place to practise first.
 2. Each lesson teaches first: three short ideas, with live read-only data from the chain.
 3. You do the action from your own wallet, with a summary of what you are about to sign.
-4. The Progress contract checks the result and records the lesson. If it isn't met, the transaction reverts, and the page explains why in plain words.
+4. The First Block contract checks the result and records the lesson. If it isn't met, the transaction reverts, and the page explains why in plain words.
 5. The page shows what just happened, using your own hash, block, gas and fee.
 6. After 5 of 5, you can graduate on mainnet with an optional note and get a card to share.
-7. The wall reads every graduate from the mainnet contract and checks testnet live. A wallet with 5 of 5 shows **Verified**. Anyone else shows **Self-reported**.
+7. The wall reads every graduate from the same contract. It only accepts wallets that passed all five lessons, so every entry is **Verified** by the chain itself.
 
 **Lesson progress and graduation are on-chain. XP and day streaks stay in your browser.**
 
@@ -124,12 +124,12 @@ App screens show a test wallet that passed all five lessons, before the Progress
 
 | # | Lesson | What you do | What the contract checks |
 | --- | --- | --- | --- |
-| 1 | Get set up | Add the network, get test BOT, check in | `checkIn()`: your wallet holds some BOT |
-| 2 | Send your first transaction | Send 0.001 test BOT, then find your hash, block and gas | `tip()`: at least 0.001 test BOT was sent |
+| 1 | Get set up | Add BOT Chain Mainnet, get a little BOT, check in | `checkIn()`: your wallet holds some BOT |
+| 2 | Send your first transaction | Send 0.001 BOT, then find your hash, block and gas | `tip()`: at least 0.001 BOT was sent |
 | 3 | Talk to a contract | Write your name to the wall | `sayHello(name)`: the name is 1 to 24 bytes, then a `Hello` event |
 | 4 | Deploy your own contract | Deploy a Counter from your wallet and submit it | `submitCounter(c)`: the code hash matches and `owner()` is you |
 | 5 | Make it do something | Press `increment()` three times | `finishCounter()`: your Counter's `count()` is at least 3 |
-| 🎓 | Graduate | One transaction on mainnet, with an optional note | `graduate(note)`: once per wallet, up to 80 bytes |
+| 🎓 | Graduate | One more transaction, with an optional note | `graduate(note)`: once per wallet, up to 80 bytes |
 
 Lessons 2 to 5 revert until the lesson before them has passed.
 
@@ -141,25 +141,25 @@ Lessons 2 to 5 revert until the lesson before them has passed.
 | `/learn` | Your path: five blocks and Graduate, with your progress |
 | `/lesson/1` to `/lesson/5` | Why it matters, Learn, Do it, Check, What just happened, Key ideas |
 | `/graduate` | The mainnet graduation form and your card |
-| `/wall` | Every graduate, with Verified or Self-reported |
+| `/wall` | Every graduate, all Verified by the contract |
 | `/privacy`, `/terms` | What stays in your browser, what goes on chain, and the terms of this community project |
 
-The hero has a dial animation, a Start lesson 1 button, a wallet check and the live graduate count. Paste a wallet into the hero to see that wallet's real progress, read from the Progress contract.
+The hero has a dial animation, a Start lesson 1 button, a wallet check and the live graduate count. Paste a wallet into the hero to see that wallet's real progress, read from the First Block contract.
 
 ## Contracts
 
-`FirstBlockProgress.sol` and `FirstBlockGraduation.sol` (Solidity 0.8.20, EVM `paris`, optimizer on with 200 runs, no tokens).
+`FirstBlock.sol` (Solidity 0.8.20, EVM `paris`, optimizer on with 200 runs, no tokens) is one contract for the whole course. The lessons and graduation live in the same place, so one address and one explorer page show every log.
 
 | Contract | Network | Chain ID | Address |
 | --- | --- | --- | --- |
-| FirstBlockProgress | BOT Chain Testnet | 968 | `0xAC67458c737AB0048193DA66512B8B418E355a7F` ([scan.bohr.life](https://scan.bohr.life/address/0xAC67458c737AB0048193DA66512B8B418E355a7F)) |
-| FirstBlockGraduation | BOT Chain Mainnet | 677 | `0x52d3764C4300384f73E3E4Cd34bF942A5e60D472` ([scan.botchain.ai](https://scan.botchain.ai/address/0x52d3764C4300384f73E3E4Cd34bF942A5e60D472)) |
+| FirstBlock | BOT Chain Mainnet | 677 | `0x1Ee20De0867047AbaBE540F5cb86569E3ce17948` ([scan.botchain.ai](https://scan.botchain.ai/address/0x1Ee20De0867047AbaBE540F5cb86569E3ce17948)) |
 
-- **FirstBlockProgress:** the checks in the table above, plus the views `progressOf`, `counterOf` and `stats`. Its owner has one power: `sweep(to)` sends the test BOT from lesson 2 back out, for example to the faucet.
-- **FirstBlockGraduation:** `graduate(note)`, plus the views `total`, `isGraduate`, `gradId` and `getGrads`. It has no owner, no admin functions and no payments.
+- **Lessons:** `checkIn()`, `tip()`, `sayHello(name)`, `submitCounter(c)` and `finishCounter()`, each unlocked by the one before. Views: `progressOf`, `counterOf`, `stats`. Events: `LessonDone` and `Hello`.
+- **Graduation:** `graduate(note)` reverts unless the wallet passed all five lessons, and works once per wallet, with a note of up to 80 bytes. Views: `total`, `isGraduate`, `gradId`, `getGrads`. Event: `Graduated`.
+- **No tokens, no payments, one admin power.** The BOT that learners tip in lesson 2 stays in the contract, and the owner can send it out with `sweep(to)` to any address. Nothing else is admin-only.
 - **Counter:** each learner deploys their own from the site. Bytecode is built without a metadata hash, so its code hash is the same wherever it is compiled. `public/counter.json` holds the bytecode and that hash.
 
-The mainnet contract was deployed with the owner's own wallet through Remix. Its code was compared with this repo's build: the logic bytes are identical (2,486 bytes), and the only difference is the metadata hash Remix appends. 13 contract tests pass (`cd contracts && npx hardhat test`).
+The deployed code was compared with this repo's build: it is identical, apart from the metadata hash and the two immutable values the constructor writes (the Counter code hash and the owner). It was deployed in block 29071129. 14 contract tests pass (`cd contracts && npx hardhat test`).
 
 ## Project layout
 
@@ -170,8 +170,8 @@ first-block/
                 lessonApp.js (landing lesson preview), lessons.json (lesson text), chain.js, tx.js, live.js,
                 xp.js, reveal.js, config.js (addresses and links), style.css
   public/       counter.json (Counter bytecode), logos
-  contracts/    Hardhat project: Counter, FirstBlockProgress and FirstBlockGraduation, tests,
-                scripts/ (make-wallet, export-counter, deploy-testnet, e2e-testnet), deployments/
+  contracts/    Hardhat project: Counter and FirstBlock, tests,
+                scripts/ (export-counter, deploy-local-grad for tests), deployments/
   docs/shots/   README images
   vercel.json   Sends every route to index.html
 ```
@@ -200,39 +200,28 @@ Secrets live only in `contracts/.env`, which is git-ignored.
 ## Deploy
 
 - **Site (Vercel):** import the repo. Vite is detected, and `vercel.json` sends every route to `index.html`. No environment variables are needed.
-- **Your own Progress contract (testnet):**
-
-```bash
-cd contracts
-node scripts/make-wallet.js     # writes a new TESTNET_KEY to contracts/.env and prints the address
-```
-
-Send that address some test BOT from the [faucet](https://faucet.botchain.ai/basic) (10 test BOT per address per 24 hours), then run:
-
-```bash
-npx hardhat run scripts/deploy-testnet.js --network botTestnet
-```
-
-The script writes `contracts/deployments/testnet.json`. Put the address and block in `TESTNET_PROGRESS` and `TESTNET_START_BLOCK` in `src/config.js`. If Node keeps resetting the RPC connection, set `NODE_OPTIONS=--dns-result-order=ipv4first` first.
-
 ## Mainnet
 
-The Graduation contract is live at [`0x52d3764C4300384f73E3E4Cd34bF942A5e60D472`](https://scan.botchain.ai/address/0x52d3764C4300384f73E3E4Cd34bF942A5e60D472). To deploy your own copy:
+The contract lives on BOT Chain mainnet (chain ID 677, RPC `https://rpc.botchain.ai`, explorer `https://scan.botchain.ai`). To deploy it in Remix:
 
-1. Open `contracts/contracts/FirstBlockGraduation.sol` in Remix. Compiler `0.8.20`, EVM version `paris`, optimizer on (200 runs). No constructor arguments.
-2. Deploy with your wallet on BOT Chain Mainnet (chain ID 677, RPC `https://rpc.botchain.ai`).
-3. Put the address in `MAINNET_CONTRACT` in `src/config.js` and redeploy the site.
+1. Open `contracts/contracts/FirstBlock.sol`. Compiler `0.8.20`, EVM version `paris`, optimizer on (200 runs). Choose the `FirstBlock` contract, not `ICounter`.
+2. One constructor argument, the Counter code hash (`codeHash` in `public/counter.json`):
+   `0xe7a52f3492aaddac0a4acf4b2278a86c7a1f312225d71a1c086bac7852ca7ff8`
+3. Deploy with your wallet on BOT Chain Mainnet. The contract is live at the address above. To deploy your own copy, put its address in `PROGRESS_CONTRACT` and its deployment block in `PROGRESS_START_BLOCK` in `src/config.js`, then redeploy the site.
+
+`src/config.js` also reads `VITE_PROGRESS_CONTRACT` and `VITE_PROGRESS_START_BLOCK`, which override the constants. The end-to-end run uses them to point the site at a simulated chain.
 
 ## Limits, said plainly
 
-- **Mainnet can't read testnet.** The site only offers graduation after 5 of 5, but anyone can call `graduate()` directly. That is why the wall checks testnet live and shows Verified or Self-reported. If the testnet RPC can't be reached, an entry shows Self-reported until the next successful read.
-- **A pass shows that a wallet did the action, not that a person understood it.** The lesson 2 questions aren't checked on chain.
+- **The contract checks the lessons, not the person.** A pass shows that a wallet did the actions on chain, not that someone understood them.
+- **The lesson 2 questions aren't checked on chain.**
 - **Lesson 5 proves the count, not who pressed.** `increment()` is open to anyone, so another wallet could raise your Counter.
 - **Lesson 1 only checks for a balance above zero.**
+- **Lessons cost real BOT.** Each step is a mainnet transaction with its own gas fee, and the 0.001 BOT tip in lesson 2 stays in the contract and the owner can sweep it out. Counters people deploy and the hello names they write stay on mainnet for good.
 - **XP and day streaks live in your browser.** They can be cleared or edited, and they don't count as proof.
 - **Your name in lesson 3 and your note on mainnet are public and permanent.** Use a nickname if you prefer.
 - **The Stuck helper answers from a fixed list.** It is not an AI.
-- **Testing:** the full browser run passed 34 of 34 checks, on the real testnet for the lessons and a simulated chain 677 for graduation, using an injected test wallet. That script isn't in this repo. The run happened before the clean Progress redeploy, which uses the same code. Graduation has not been sent through the site on the real mainnet yet.
+- **Testing:** a full browser run passed 32 of 32 checks on a simulated BOT Chain mainnet (a local node with chain ID 677), covering all five lessons, graduation, the wall and a wallet that skipped the lessons being refused, with an injected test wallet. That script isn't in this repo. Nothing has been sent through the site on the real mainnet yet.
 
 ## Who is First Block for?
 
@@ -246,7 +235,7 @@ The Graduation contract is live at [`0x52d3764C4300384f73E3E4Cd34bF942A5e60D472`
 
 | Version | Features |
 | --- | --- |
-| **MVP (V1)** | Five lessons checked on testnet, Learn sections, sign previews, mainnet graduation, shareable card, graduates wall |
+| **MVP (V1)** | Five lessons checked on mainnet, Learn sections, sign previews, mainnet graduation, shareable card, graduates wall |
 | Next | Not decided yet |
 
 Only the MVP (V1) is built today.
@@ -254,5 +243,5 @@ Only the MVP (V1) is built today.
 ## Important notes
 
 - First Block never asks for your recovery phrase. Never share it with anyone.
-- Test BOT has no value. Lessons 1 to 5 can't cost you real money. Graduation uses a little real BOT for gas.
+- Every lesson and graduation is a real mainnet transaction. Each costs a small gas fee in BOT, about 0.01 BOT for the whole course. Read the You're about to sign box before you confirm.
 - First Block is a community project, not official BOT Chain education. If it disagrees with the [official docs](https://dev-docs.botchain.ai/docs/intro), the official docs are right.

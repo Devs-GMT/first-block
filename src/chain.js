@@ -1,5 +1,5 @@
 import { BrowserProvider, Contract, JsonRpcProvider, formatEther } from 'ethers';
-import { MAINNET_CONTRACT, TESTNET_PROGRESS, LINKS } from './config.js';
+import { MAINNET_CONTRACT, PROGRESS_CONTRACT, LESSON_NET, LINKS } from './config.js';
 
 export const NETWORKS = {
   testnet: { id: 968, hex: '0x3c8', name: 'BOT Chain Testnet', rpc: 'https://rpc.bohr.life', explorer: LINKS.testnetExplorer },
@@ -33,6 +33,7 @@ export const GRADUATION_ABI = [
   'function gradId(address) view returns (uint256)',
   'function grads(uint256) view returns (address wallet, string note, uint64 at)',
   'event Graduated(uint256 indexed id, address indexed wallet)',
+  'error NotFinished(uint8 passed)',
   'error AlreadyGraduated()',
   'error NoteTooLong()',
 ];
@@ -55,7 +56,7 @@ export async function withRetry(fn, tries = 3) {
 
 export const COUNTER_ABI = ['function owner() view returns (address)', 'function count() view returns (uint256)', 'function increment()', 'event Incremented(address indexed by, uint256 newCount)'];
 
-export const progressRead = () => (TESTNET_PROGRESS ? new Contract(TESTNET_PROGRESS, PROGRESS_ABI, reads.testnet) : null);
+export const progressRead = () => (PROGRESS_CONTRACT ? new Contract(PROGRESS_CONTRACT, PROGRESS_ABI, reads[LESSON_NET]) : null);
 export const graduationRead = () => (MAINNET_CONTRACT ? new Contract(MAINNET_CONTRACT, GRADUATION_ABI, reads.mainnet) : null);
 
 export const short = (a) => `${a.slice(0, 6)}…${a.slice(-4)}`;
@@ -65,8 +66,8 @@ export const isAddress = (v) => /^0x[0-9a-fA-F]{40}$/.test(v);
 export async function scanWallet(address, onStep) {
   const out = { done: null, balance: null, txs: null, graduate: null };
   const step = (key, val) => { out[key] = val; onStep(key, val); };
-  try { step('balance', formatEther(await withRetry(() => reads.testnet.getBalance(address)))); } catch { step('balance', undefined); }
-  try { step('txs', await withRetry(() => reads.testnet.getTransactionCount(address))); } catch { step('txs', undefined); }
+  try { step('balance', formatEther(await withRetry(() => reads[LESSON_NET].getBalance(address)))); } catch { step('balance', undefined); }
+  try { step('txs', await withRetry(() => reads[LESSON_NET].getTransactionCount(address))); } catch { step('txs', undefined); }
   const p = progressRead();
   if (p) { try { const [done, flags] = await withRetry(() => p.progressOf(address)); step('done', { count: Number(done), flags: Number(flags) }); } catch { step('done', undefined); } }
   else step('done', null);

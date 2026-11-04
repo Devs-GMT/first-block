@@ -7,10 +7,10 @@ const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /* Copy shown beside the preview. The preview itself reuses the real lesson page's markup and classes. */
 const COPY = [
-  { eyebrow: 'Lesson 1 · Get set up', title: 'Your wallet, on BOT Chain, in 2 minutes', body: 'Install MetaMask, add BOT Chain Testnet in one click, and grab free test BOT from the faucet.', do: ['What you\'ll do', 'Add the network and call checkIn(). The contract confirms your wallet has gas.'], learn: ['What you\'ll learn', 'Wallet, address, network and gas, in plain words.'], cap: 'Lesson 1: the same steps and check you get on the real lesson page. Example values.' },
-  { eyebrow: 'Lesson 2 · First transaction', title: 'Send your first transaction, then read it', body: 'Send 0.001 test BOT to the Progress contract, then open it on the explorer and find your hash, block and gas.', do: ['What you\'ll do', 'Press Send. The contract records your tip if the value is at least 0.001.'], learn: ['What you\'ll learn', 'Transactions, blocks and the explorer, using your own data.'], cap: 'Lesson 2: a real transaction, then your own hash, block and gas. Example values.' },
+  { eyebrow: 'Lesson 1 · Get set up', title: 'Your wallet, on BOT Chain, in 2 minutes', body: 'Install MetaMask, add BOT Chain Mainnet in one click, and get a little BOT for gas.', do: ['What you\'ll do', 'Add the network and call checkIn(). The contract confirms your wallet has BOT for gas.'], learn: ['What you\'ll learn', 'Wallet, address, network and gas, in plain words.'], cap: 'Lesson 1: the same steps and check you get on the real lesson page. Example values.' },
+  { eyebrow: 'Lesson 2 · First transaction', title: 'Send your first transaction, then read it', body: 'Send 0.001 BOT to the First Block contract, then open it on the explorer and find your hash, block and gas.', do: ['What you\'ll do', 'Press Send. The contract records your tip if the value is at least 0.001.'], learn: ['What you\'ll learn', 'Transactions, blocks and the explorer, using your own data.'], cap: 'Lesson 2: a real transaction, then your own hash, block and gas. Example values.' },
   { eyebrow: 'Lesson 3 · Talk to a contract', title: 'Say hello and watch it land on the wall', body: 'Call sayHello with your name. Your hello is emitted as an event and shows up on a live wall.', do: ['What you\'ll do', 'Type a name (24 characters at most) and call sayHello.'], learn: ['What you\'ll learn', 'Functions, events, and the difference between reads and writes.'], cap: 'Lesson 3: your hello written to the contract, then read back from its events. Example values.' },
-  { eyebrow: 'Lesson 4 · Deploy your own contract', title: 'Deploy a Counter that only you own', body: 'Read a short contract line by line, deploy it from your wallet, and submit its address for checking.', do: ['What you\'ll do', 'Deploy Counter, then submit its address to the Progress contract.'], learn: ['What you\'ll learn', 'Deploying, constructors, owners and contract addresses.'], cap: 'Lesson 4: deploy from your wallet, then the contract checks code and owner. Example values.' },
+  { eyebrow: 'Lesson 4 · Deploy your own contract', title: 'Deploy a Counter that only you own', body: 'Read a short contract line by line, deploy it from your wallet, and submit its address for checking.', do: ['What you\'ll do', 'Deploy Counter, then submit its address to the First Block contract.'], learn: ['What you\'ll learn', 'Deploying, constructors, owners and contract addresses.'], cap: 'Lesson 4: deploy from your wallet, then the contract checks code and owner. Example values.' },
   { eyebrow: 'Lesson 5 · Make it do something', title: 'Press increment three times and read it back', body: 'Call increment on your own Counter, read the number for free, and let the contract verify count is at least 3.', do: ['What you\'ll do', 'Press increment() three times, then finish the lesson.'], learn: ['What you\'ll learn', 'State, view functions and gas per call.'], cap: 'Lesson 5: state that changes with every call, read back by the contract. Example values.' },
   { eyebrow: 'Graduation · Mainnet', title: 'Graduate on BOT Chain mainnet', body: 'After 5 of 5, switch to mainnet in one click and call graduate with an optional note. You\'ll need a little real BOT for gas.', do: ['What you\'ll do', 'Add a note (80 characters at most) and sign one transaction.'], learn: ['What you\'ll get', 'A graduation card to share or download, and a place on the wall.'], cap: 'Graduation: one mainnet transaction, then a card you can share. Example values.' },
 ];
@@ -22,15 +22,15 @@ const fakeIn = (k, ph) => `<span class="fake-in" data-k="${k}"><em class="ph">${
 
 const SCENES = [
   { okText: 'The contract confirmed lesson 1.',
-    steps: [li('Add BOT Chain Testnet', 'One click adds the network (chain ID 968).', btn('add', 'Add network')),
-      li('Check in', 'The contract will look at your balance. If you have test BOT to pay for gas, you\'re set up.', btn('go', 'Check in') + txs('go'))],
+    steps: [li('Add BOT Chain Mainnet', 'One click adds the network (chain ID 677).', btn('add', 'Add network')),
+      li('Check in', 'The contract will look at your balance. If you have BOT to pay for gas, you\'re set up.', btn('go', 'Check in') + txs('go'))],
     async run(h) {
       await h.w(900); await h.press('add'); h.label('add', 'Network added'); h.ok(0);
       await h.w(700); await h.press('go'); await h.tx('go', '0x3f9a…b1c2', '1,234,567'); h.ok(1);
       await h.passed();
     } },
   { okText: 'The contract confirmed lesson 2.',
-    steps: [li('Send 0.001 test BOT', 'Press Send and confirm in MetaMask. The contract records your tip.', btn('go', 'Send 0.001 test BOT') + txs('go')),
+    steps: [li('Send 0.001 BOT', 'Press Send and confirm in MetaMask. The contract records your tip.', btn('go', 'Send 0.001 BOT') + txs('go')),
       li('Open it on the explorer', 'Find your three numbers: hash, block and gas.', '<span class="hp-data st" data-k="data"><span class="hp-f"><span>hash</span><b class="mono">0x3f9a…b1c2</b></span><span class="hp-f"><span>block</span><b class="mono">#1,234,567</b></span><span class="hp-f"><span>gas used</span><b class="mono">33,717</b></span></span>')],
     async run(h) {
       await h.w(900); await h.press('go'); await h.tx('go', '0x3f9a…b1c2', '1,234,567'); h.ok(0);
@@ -48,7 +48,7 @@ const SCENES = [
     } },
   { okText: 'The contract confirmed lesson 4.',
     steps: [li('Deploy your Counter', 'Your wallet creates a new contract. You become its owner.', btn('dep', 'Deploy my Counter') + txs('dep')),
-      li('Submit it for checking', 'The Progress contract checks the code and that you are the owner.', btn('sub', 'Submit my Counter') + txs('sub'))],
+      li('Submit it for checking', 'The First Block contract checks the code and that you are the owner.', btn('sub', 'Submit my Counter') + txs('sub'))],
     async run(h) {
       await h.w(900); await h.press('dep'); await h.tx('dep', '0xcc89…1690', '1,234,640'); h.desc(0, 'Your Counter: <span class="mono">0x5d1e…a09c</span>'); h.ok(0);
       await h.w(700); await h.press('sub'); await h.tx('sub', '0xdf57…c7c9', '1,234,655'); h.ok(1);
@@ -157,7 +157,7 @@ export function mountLessons({ app, tabs, left }) {
   const render = (i) => {
     eyebrow.textContent = COPY[i].eyebrow;
     url.textContent = `First Block · ${i === 5 ? '/graduate' : `/lesson/${i + 1}`}`;
-    const net = $('#stNet', app); net.textContent = 'Testnet'; net.classList.remove('main');
+    const net = $('#stNet', app); net.textContent = 'Mainnet'; net.classList.add('main');
     drawDots(i, false);
     cap.textContent = COPY[i].cap;
     steps.innerHTML = SCENES[i].steps.join('');

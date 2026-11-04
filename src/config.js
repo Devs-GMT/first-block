@@ -1,9 +1,11 @@
-// Single place for deployed addresses. Both contracts are public, so they live in the source and ship with every build.
-// VITE_MAINNET_CONTRACT overrides the mainnet address, which lets a test build point at a simulated chain.
-export const MAINNET_CONTRACT = import.meta.env.VITE_MAINNET_CONTRACT || '0x52d3764C4300384f73E3E4Cd34bF942A5e60D472';
-export const TESTNET_PROGRESS = '0xAC67458c737AB0048193DA66512B8B418E355a7F';
-// First block to scan for Hello events; set it to the Progress deployment block.
-export const TESTNET_START_BLOCK = 29088619;
+// Single place for the deployed address. One contract, FirstBlock, runs the five lessons and graduation on BOT Chain
+// mainnet. The address is public, so it ships with every build. VITE_PROGRESS_CONTRACT and VITE_PROGRESS_START_BLOCK
+// override it, which lets a test build point at a simulated chain.
+export const PROGRESS_CONTRACT = import.meta.env.VITE_PROGRESS_CONTRACT || '0x1Ee20De0867047AbaBE540F5cb86569E3ce17948';
+// The block the contract was deployed in: the first block to scan for Hello events.
+export const PROGRESS_START_BLOCK = Number(import.meta.env.VITE_PROGRESS_START_BLOCK) || 29071129;
+export const MAINNET_CONTRACT = PROGRESS_CONTRACT;
+export const LESSON_NET = 'mainnet';
 
 export const LINKS = {
   botchain: 'https://botchain.ai',

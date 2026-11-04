@@ -1,5 +1,5 @@
 import './style.css';
-import { MAINNET_CONTRACT, TESTNET_PROGRESS, LINKS } from './config.js';
+import { MAINNET_CONTRACT, PROGRESS_CONTRACT, LINKS } from './config.js';
 import { mountLessons } from './lessonApp.js';
 import { io, sweepify } from './reveal.js';
 import { initWalletUI, initScan, initWall, initGraduates } from './live.js';
@@ -144,8 +144,8 @@ function selectTab(i) { lessons.goTo(i); }
 /* ---------- Glossary ---------- */
 const WORDS = [
   ['wallet', 'Wallet', 'An app that holds your keys and signs transactions for you.'],
-  ['network', 'Network', 'The chain your wallet is talking to, such as BOT Chain Testnet.'],
-  ['drop', 'Faucet', 'A site that gives you free test BOT so you can pay for gas.'],
+  ['network', 'Network', 'The chain your wallet is talking to, such as BOT Chain Mainnet.'],
+  ['drop', 'Faucet', 'A site that gives away free coins on a testnet, so you can practise without real money.'],
   ['gas', 'Gas', 'The small fee paid to have a transaction included in a block.'],
   ['send', 'Transaction', 'A signed message that changes something on the chain.'],
   ['cube', 'Block', 'A batch of transactions the chain seals together.'],
@@ -153,19 +153,19 @@ const WORDS = [
   ['doc', 'Contract', 'Code that lives at an address on the chain and runs as written.'],
   ['func', 'Function', 'A named action a contract lets you call.'],
   ['bell', 'Event', 'A log a contract emits so apps can read what happened.'],
-  ['flask', 'Testnet', 'A practice chain where the coins are free and mistakes are cheap.'],
+  ['flask', 'Testnet', 'A free copy of a chain for practice. Its coins have no value, and a faucet hands them out.'],
   ['shield', 'Mainnet', 'The real chain, where BOT has value. Graduation lives here.'],
 ];
 const GROUP = { Wallet: 'g', Network: 'g', Faucet: 'g', Gas: 'g', Transaction: 'b', Block: 'b', Explorer: 'b', Contract: 'v', Function: 'v', Event: 'v', Testnet: 'a', Mainnet: 'a' };
 // Where each word first comes up in the course (shown on the back of the tile).
-const USED = { Wallet: ['L1', 'Lesson 1 · Get set up'], Network: ['L1', 'Lesson 1 · Get set up'], Faucet: ['L1', 'Lesson 1 · Get set up'], Gas: ['L1', 'Lesson 1 · Get set up'], Transaction: ['L2', 'Lesson 2 · First transaction'], Block: ['L2', 'Lesson 2 · First transaction'], Explorer: ['L2', 'Lesson 2 · First transaction'], Contract: ['L3', 'Lessons 3 and 4 · Contracts'], Function: ['L3', 'Lesson 3 · Talk to a contract'], Event: ['L3', 'Lesson 3 · Talk to a contract'], Testnet: ['L1–5', 'Every lesson runs on testnet'], Mainnet: ['Grad', 'Graduation, one mainnet transaction'] };
+const USED = { Wallet: ['L1', 'Lesson 1 · Get set up'], Network: ['L1', 'Lesson 1 · Get set up'], Faucet: ['L1', 'Lesson 1 · Get set up'], Gas: ['L1', 'Lesson 1 · Get set up'], Transaction: ['L2', 'Lesson 2 · First transaction'], Block: ['L2', 'Lesson 2 · First transaction'], Explorer: ['L2', 'Lesson 2 · First transaction'], Contract: ['L3', 'Lessons 3 and 4 · Contracts'], Function: ['L3', 'Lesson 3 · Talk to a contract'], Event: ['L3', 'Lesson 3 · Talk to a contract'], Testnet: ['L1', 'Lesson 1 · Where to practise for free'], Mainnet: ['L1–5', 'Every lesson, and graduation'] };
 $('#tiles').innerHTML = WORDS.map(([ic, name, def]) => `<button class="tile reveal t-${GROUP[name]}" aria-label="${name}: ${def} Used in ${USED[name][1]}."><span class="tile-in"><span class="tile-f"><span class="tile-top">${icon(ic)}<i class="tile-tag">${USED[name][0]}</i></span><b>${name}</b><span class="tile-def">${def}</span></span><span class="tile-b"><span class="tile-k">Where you'll use it</span><b>${USED[name][1]}</b></span></span></button>`).join('');
 $$('.tile').forEach((t) => { io.observe(t); t.addEventListener('click', () => t.classList.toggle('flip')); });
 
 /* ---------- Live demo stream (example hellos until the contract is live) ---------- */
 (() => {
   const list = $('#demoList');
-  if (!list || TESTNET_PROGRESS) return;
+  if (!list || PROGRESS_CONTRACT) return;
   const EX = ['Ada', 'Lin', 'Sam', 'Noor', 'Eko', 'Mina', 'Theo', 'Zara'];
   let n = 0;
   const add = () => {
@@ -184,11 +184,11 @@ $$('.tile').forEach((t) => { io.observe(t); t.addEventListener('click', () => t.
 
 /* ---------- FAQ ---------- */
 const FAQ = [
-  ['Is it free?', 'The five lessons run on BOT Chain testnet, which is free. Graduating happens on mainnet and costs a tiny bit of real BOT for gas.'],
+  ['Is it free?', 'The lessons have no fee of their own, but every step is a real transaction on BOT Chain mainnet, so you pay a tiny gas fee in BOT. The whole course, graduation included, takes about 0.01 BOT. To practise with free coins first, BOT Chain Testnet has a faucet.'],
   ['Do I need to know how to code?', 'No. You read a 15-line contract and deploy it from a button. You\'ll understand what each line does by the end.'],
   ['Is my wallet safe?', 'First Block never asks for a seed phrase or private key, and there are no approvals or token permissions. You only sign normal transactions. Never share your recovery phrase with anyone, including us.'],
   ['What if I get stuck?', 'Every lesson has a Stuck? button with the three most common fixes, and a link to BOTGuide for the rest.'],
-  ['What does Verified mean?', 'Mainnet can\'t read testnet, so the website unlocks graduate() after you pass 5 of 5. On the graduates wall, a Verified badge appears only when the testnet Progress contract confirms 5 of 5 for that wallet, checked live. Anyone else is shown as Self-reported.'],
+  ['What does Verified mean?', 'Graduating is a transaction on the same contract that checks your lessons. It refuses any wallet that has not passed all five, so every graduate on the wall is Verified by the chain itself, not by the website.'],
   ['Can I redo a lesson?', 'Yes. A finished lesson shows your transaction link and a Redo for practice button. Redoing never undoes your progress.'],
 ];
 $('#faqList').innerHTML = FAQ.map(([q, a], i) => `<div class="q reveal${i === 0 ? ' open' : ''}"><button aria-expanded="${i === 0}">${q}${icon('plus')}</button><div class="q-a"><div><p>${a}</p></div></div></div>`).join('');
@@ -196,9 +196,9 @@ $$('.q').forEach((q) => { io.observe(q); $('button', q).addEventListener('click'
 
 /* ---------- Helper ---------- */
 const HELP = [
-  ['My wallet shows the wrong network', 'Open MetaMask, tap the network name at the top, and pick BOT Chain Testnet (chain ID 968). If it\'s missing, press Add network in lesson 1.'],
-  ['Faucet isn\'t working', 'The faucet gives 10 test BOT per address every 24 hours. Check you pasted the right address, and try again later if you already claimed today.'],
-  ['Transaction failed', 'Make sure you\'re on testnet and have some test BOT for gas. If MetaMask says the transaction was rejected, press the button again and confirm.'],
+  ['My wallet shows the wrong network', 'Open MetaMask, tap the network name at the top, and pick BOT Chain Mainnet (chain ID 677). If it\'s missing, press Add network in lesson 1.'],
+  ['I have no BOT for gas', 'The lessons need a little real BOT on BOT Chain Mainnet, about 0.01 BOT for the whole course. Get some, then press Check again. The testnet faucet only gives test coins, which the lessons don\'t use.'],
+  ['Transaction failed', 'Make sure you\'re on BOT Chain Mainnet and have some BOT for gas. If MetaMask says the transaction was rejected, press the button again and confirm.'],
 ];
 const hb = $('#helperBtn'), hp = $('#helperPanel'), ha = $('#helperA');
 $('#helperQ').innerHTML = HELP.map(([q], i) => `<button data-i="${i}"><span>${q}</span>${icon('chev', 'xs')}</button>`).join('');

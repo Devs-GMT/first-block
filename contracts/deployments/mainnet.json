@@ -1,8 +1,11 @@
 {
   "network": "botMainnet",
   "chainId": 677,
-  "graduation": "0x52d3764C4300384f73E3E4Cd34bF942A5e60D472",
-  "deployedBy": "project owner, through Remix",
+  "contract": "FirstBlock",
+  "address": "0x1Ee20De0867047AbaBE540F5cb86569E3ce17948",
+  "block": 29071129,
+  "counterCodeHash": "0xe7a52f3492aaddac0a4acf4b2278a86c7a1f312225d71a1c086bac7852ca7ff8",
+  "owner": "0x257F051d3D54e976FFFc2efbBc02224e1eDd8870",
   "compiler": "solc 0.8.20, evmVersion paris, optimizer 200",
-  "note": "On-chain code equals the repo build except the metadata hash Remix appends (logic bytes identical, 2486 bytes)."
+  "note": "Deployed through Remix. On-chain code equals the repo build except the metadata hash and the two immutable values (counter code hash and owner)."
 }
