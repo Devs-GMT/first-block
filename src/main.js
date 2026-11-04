@@ -1,6 +1,5 @@
 import './style.css';
 import { MAINNET_CONTRACT, TESTNET_PROGRESS, LINKS } from './config.js';
-import { graduationRead, onWallet, progressRead, short, withRetry } from './chain.js';
 import { mountLessons } from './lessonApp.js';
 import { io, sweepify } from './reveal.js';
 import { initWalletUI, initScan, initWall, initGraduates } from './live.js';
@@ -50,80 +49,77 @@ $$('#sheet a').forEach((a) => a.addEventListener('click', () => { nav.classList.
 $$('[data-sweep]').forEach(sweepify);
 $$('.reveal').forEach((el) => io.observe(el));
 
-/* ---------- Hero: a field of blocks ----------
-   The grid fills the hero and fades out behind the copy. Now and then one block "gets mined" and lights up. */
+/* ---------- Hero dial: a dotted dome with a comet that travels along it ---------- */
 (() => {
-  const el = $('#heroField');
-  if (!el) return;
-  let w = 0, h = 0, timer = 0, on = true;
-  const build = () => {
-    const cw = el.clientWidth, ch = el.clientHeight;
-    if (!cw || !ch || (cw === w && ch === h)) return;
-    w = cw; h = ch;
-    const small = cw < 900, S = small ? 38 : 58, G = small ? 6 : 8, p = S + G;
-    const cols = Math.ceil(cw / p) + 1, rows = Math.ceil(ch / p) + 1;
-    el.style.setProperty('--s', `${S}px`); el.style.setProperty('--g', `${G}px`);
-    el.style.gridTemplateColumns = `repeat(${cols}, ${S}px)`; el.style.gridAutoRows = `${S}px`;
-    let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
-    el.innerHTML = Array.from({ length: cols * rows }, () => { const v = rnd(); return `<i class="fc${v > 0.9 ? ' g2' : v > 0.78 ? ' g1' : ''}"></i>`; }).join('');
+  const cv = $('#dial');
+  if (!cv) return;
+  const ctx = cv.getContext('2d');
+  const TICKS = 15, GAP = 16;
+  let w = 0, h = 0, dpr = 1, on = true, raf = 0, geo = null;
+  const resize = () => {
+    dpr = Math.min(devicePixelRatio || 1, 2);
+    w = cv.clientWidth; h = cv.clientHeight;
+    cv.width = w * dpr; cv.height = h * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const r = Math.max(w * 0.46, 320), cx = w / 2, cy = 30 + r;
+    const cut = Math.asin(Math.min(Math.max((cy - h) / r, 0), 0.98)) * 180 / Math.PI;
+    const a0 = 180 + cut, a1 = 360 - cut;
+    const n = Math.max(12, Math.floor((r * (a1 - a0) * Math.PI / 180) / GAP));
+    geo = { r, cx, cy, a0, a1, n };
   };
-  const mine = () => {
-    const cells = el.children;
-    if (on && cells.length) { const c = cells[Math.floor(Math.random() * cells.length)]; if (!c.classList.contains('mine')) { c.classList.add('mine'); c.addEventListener('animationend', () => c.classList.remove('mine'), { once: true }); } }
-    timer = setTimeout(mine, 650 + Math.random() * 700);
+  const draw = (time) => {
+    ctx.clearRect(0, 0, w, h);
+    const { r, cx, cy, a0, a1, n } = geo;
+    const phase = reduce ? 0.4 : time / 1000 * 0.32;
+    const head = 0.5 - 0.5 * Math.cos(phase);
+    const dir = Math.sin(phase) >= 0 ? 1 : -1;
+    const at = (u, inset = 0) => { const a = ((a0 + (a1 - a0) * u) * Math.PI) / 180; return [cx + Math.cos(a) * (r - inset), cy + Math.sin(a) * (r - inset)]; };
+    const hi = head * (n - 1);
+    for (let i = 0; i < n; i++) {
+      const di = (i - hi) * dir;
+      const [x, y] = at(i / (n - 1));
+      let size = 2.6, color = 'rgba(30,29,28,0.3)';
+      if (Math.abs(di) < 0.6) { size = 8; color = '#1e1d1c'; }
+      else if (di < 0 && di > -20) { const k = 1 + di / 20; size = 2.6 + 3 * k; color = `rgba(31,169,113,${0.3 + 0.7 * k})`; }
+      else if (di > 0 && di < 9) { const k = 1 - di / 9; size = 2.6 + 2.4 * k; color = `rgba(120,117,111,${0.4 + 0.4 * k})`; }
+      ctx.beginPath(); ctx.arc(x, y, size / 2, 0, 6.2832); ctx.fillStyle = color; ctx.fill();
+    }
+    ctx.lineCap = 'round';
+    for (let i = 0; i < TICKS; i++) {
+      const u = (i + 0.5) / TICKS, k = Math.max(0, 1 - Math.abs(u - head) / 0.1);
+      const [x1, y1] = at(u, 96), [x2, y2] = at(u, 146 + 18 * k);
+      ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2);
+      ctx.strokeStyle = `rgba(30,29,28,${0.14 + 0.6 * k})`; ctx.lineWidth = 1.5; ctx.stroke();
+    }
   };
-  build();
-  let rz = 0; addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(build, 150); });
-  if (!reduce) { new IntersectionObserver(([e]) => { on = e.isIntersecting; }).observe(el); timer = setTimeout(mine, 1200); }
+  const loop = (t) => { draw(t); if (on && !reduce) raf = requestAnimationFrame(loop); };
+  resize(); draw(0);
+  addEventListener('resize', () => { resize(); if (reduce) draw(0); });
+  new IntersectionObserver(([e]) => { on = e.isIntersecting; cancelAnimationFrame(raf); if (on && !reduce) raf = requestAnimationFrame(loop); }).observe(cv);
 })();
 
-/* ---------- Hero: the lesson path ----------
-   With no wallet the blocks run a labelled preview. A connected or pasted wallet replaces it with that wallet's
-   real progress from the contracts, so a learner never mistakes the preview for their own. */
-const heroPath = (() => {
-  const row = $('#heroChain'), cap = $('#heroCap');
-  if (!row) return null;
-  const tiles = $$('.hc', row);
-  const PREVIEW = '<span class="hc-tag">Preview</span>Five blocks on BOT Chain Testnet, then one on Mainnet.';
-  let shown = -1, timer = 0, source = null;
-  const set = (done, animate = true) => {
-    tiles.forEach((t, i) => {
-      const was = t.classList.contains('done'), now = i < done;
-      t.classList.toggle('done', now);
-      t.classList.toggle('next', i === done);
-      if (animate && now && !was) { t.classList.remove('click'); void t.offsetWidth; t.classList.add('click'); }
+/* ---------- Hero: animated "Your path" window ---------- */
+(() => {
+  const card = $('#jcard');
+  if (!card) return;
+  const nodes = $$('.jn', card), num = $('#jcNum'), line = $('#jcLine'), xp = $('#jcXp');
+  const MSG = ['Wallet has gas. Lesson 1 passed.', 'Transaction recorded. Lesson 2 passed.', 'Hello written to the chain. Lesson 3 passed.', 'Counter deployed and owned by you. Lesson 4 passed.', 'Count reached 3. Lesson 5 passed.', 'Graduated on BOT Chain mainnet.'];
+  const set = (d) => {
+    nodes.forEach((n, i) => {
+      n.classList.toggle('done', i < d);
+      n.classList.toggle('cur', i === d);
+      $('.jn-dot', n).innerHTML = i < d ? icon('check', 'sm') : i === 5 ? icon('cap', 'sm') : String(i + 1);
     });
-    shown = done;
+    num.textContent = d >= 6 ? 'Graduated' : `${Math.min(d, 5)} of 5`;
+    line.innerHTML = d ? `${icon('check', 'sm')}${MSG[d - 1]}` : 'Each block unlocks the next.';
+    xp.classList.remove('on'); if (d && d < 6) { void xp.offsetWidth; xp.classList.add('on'); }
   };
-  const step = () => { if (source) return; const n = shown >= 6 ? 0 : shown + 1; set(n); timer = setTimeout(step, n === 6 ? 3200 : n === 0 ? 900 : 1300); };
-  const preview = () => { source = null; cap.innerHTML = PREVIEW; row.classList.remove('wait'); set(reduce ? 2 : 0, false); clearTimeout(timer); if (!reduce) timer = setTimeout(step, 1700); };
-  // state: 'reading', 'failed' or the number of blocks done (6 once graduated).
-  const show = (addr, state, from) => {
-    source = from; clearTimeout(timer);
-    row.classList.toggle('wait', state === 'reading');
-    const who = `<code>${short(addr)}</code>`;
-    if (state === 'reading') { set(0, false); tiles[0].classList.remove('next'); cap.innerHTML = `${who}<span class="spin"></span>Reading the chain…`; return; }
-    if (state === 'failed') { set(0, false); tiles[0].classList.remove('next'); cap.innerHTML = `${who}Couldn't read this wallet's progress. The testnet RPC may be busy.`; return; }
-    set(state);
-    cap.innerHTML = `${who}${state === 6 ? 'Passed 5 of 5 and graduated on mainnet.' : state === 5 ? 'Passed 5 of 5. Ready to graduate.' : `Passed ${state} of 5. Lesson ${state + 1} is next.`}`;
-  };
-  preview();
-  let run = 0;
-  onWallet(async (w) => {
-    if (source === 'checked') return;
-    const tok = ++run;
-    if (!w.address) { if (source !== null) preview(); return; }
-    show(w.address, 'reading', 'wallet');
-    try {
-      const [done] = await withRetry(() => progressRead().progressOf(w.address));
-      let n = Number(done);
-      if (n === 5) { try { if (await withRetry(() => graduationRead().isGraduate(w.address))) n = 6; } catch { /* stays at 5 */ } }
-      if (tok === run && source === 'wallet') show(w.address, n, 'wallet');
-    } catch { if (tok === run && source === 'wallet') show(w.address, 'failed', 'wallet'); }
-  });
-  return { checked: ({ addr, state }) => { run++; show(addr, state, 'checked'); } };
+  set(0);
+  if (reduce) { set(3); return; }
+  let t = 0, d = 0;
+  const tick = () => { if (d > 6) d = 0; set(d); d++; t = setTimeout(tick, d === 7 ? 3400 : 1500); };
+  new IntersectionObserver(([e]) => { clearTimeout(t); if (e.isIntersecting) tick(); }, { threshold: 0.3 }).observe(card);
 })();
-document.addEventListener('fb:blocks', (e) => heroPath?.checked(e.detail));
 
 /* ---------- Footer: on phones each link column folds into an accordion ---------- */
 (() => {

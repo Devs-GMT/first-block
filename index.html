@@ -93,27 +93,35 @@
 <main id="home">
 <!-- 1 · Hero -->
 <section class="hero" id="top">
-  <div class="hero-field" id="heroField" aria-hidden="true"></div>
-  <nav class="hc-row" id="heroChain" aria-label="The five lessons and graduation"><a class="hc" href="/lesson/1" title="Lesson 1: Get set up" style="--i:0;--x:-594px;--y:0"><span class="hc-top"><svg class="ic"><use href="#i-wallet"/></svg><span class="hc-n">01</span><svg class="ic sm hc-ok"><use href="#i-check"/></svg></span><span class="hc-b"><b>Get set up</b><code>checkIn()</code></span></a><a class="hc" href="/lesson/2" title="Lesson 2: First transaction" style="--i:1;--x:-528px;--y:1"><span class="hc-top"><svg class="ic"><use href="#i-send"/></svg><span class="hc-n">02</span><svg class="ic sm hc-ok"><use href="#i-check"/></svg></span><span class="hc-b"><b>First transaction</b><code>tip()</code></span></a><a class="hc" href="/lesson/3" title="Lesson 3: Talk to a contract" style="--i:2;--x:-462px;--y:2"><span class="hc-top"><svg class="ic"><use href="#i-chat"/></svg><span class="hc-n">03</span><svg class="ic sm hc-ok"><use href="#i-check"/></svg></span><span class="hc-b"><b>Talk to a contract</b><code>sayHello(name)</code></span></a><a class="hc" href="/lesson/4" title="Lesson 4: Deploy" style="--i:3;--x:462px;--y:4"><span class="hc-top"><svg class="ic"><use href="#i-rocket"/></svg><span class="hc-n">04</span><svg class="ic sm hc-ok"><use href="#i-check"/></svg></span><span class="hc-b"><b>Deploy</b><code>submitCounter(c)</code></span></a><a class="hc" href="/lesson/5" title="Lesson 5: Make it work" style="--i:4;--x:528px;--y:5"><span class="hc-top"><svg class="ic"><use href="#i-counter"/></svg><span class="hc-n">05</span><svg class="ic sm hc-ok"><use href="#i-check"/></svg></span><span class="hc-b"><b>Make it work</b><code>finishCounter()</code></span></a><a class="hc gold" href="/graduate" title="Graduate on mainnet" style="--i:5;--x:594px;--y:6"><span class="hc-top"><svg class="ic"><use href="#i-cap"/></svg><span class="hc-n">Mainnet</span><svg class="ic sm hc-ok"><use href="#i-check"/></svg></span><span class="hc-b"><b>Graduate</b><code>graduate(note)</code></span></a></nav>
-  <div class="wrap hero-screen">
-    <div class="hero-copy">
-      <p class="eyebrow fade fade-tag"><svg class="ic"><use href="#i-cube"/></svg>Learn by doing</p>
-      <h1 class="title fade fade-title" data-sweep>Your first steps on BOT&nbsp;Chain, one block at a time.</h1>
-      <p class="lead fade fade-copy">5 short lessons. Each one ends with a real action on BOT Chain testnet, checked by the chain itself. About 40 minutes, free.</p>
-      <div class="hero-act fade fade-copy">
-        <a class="pill pill-dark big" href="/lesson/1">Start lesson 1</a>
-        <form class="search" id="walletForm" autocomplete="off">
-          <svg class="ic"><use href="#i-search"/></svg>
-          <input id="walletInput" type="text" inputmode="text" spellcheck="false" placeholder="Paste a wallet to check progress" aria-label="Wallet address" />
-          <button class="pill pill-soft" type="submit">Check</button>
-        </form>
-      </div>
-      <p class="search-note" id="walletResult" role="status"></p>
-      <div class="scan" id="scan" hidden aria-live="polite"></div>
-      <p class="trust" id="heroTrust" hidden><svg class="ic sm"><use href="#i-cap"/></svg><span></span></p>
-      <p class="hc-cap" id="heroCap" aria-live="polite"></p>
+  <div class="hero-screen">
+  <canvas class="dial" id="dial" aria-hidden="true"></canvas>
+  <div class="hero-inner">
+    <span class="tag fade fade-tag"><svg class="ic sm"><use href="#i-cube"/></svg>Learn by doing</span>
+    <h1 class="title fade fade-title" data-sweep>Your first steps on BOT&nbsp;Chain, one block at a time.</h1>
+    <p class="lead fade fade-copy">5 short lessons. Each one ends with a real action on BOT Chain testnet, checked by the chain itself. About 40 minutes, free.</p>
+    <form class="search fade fade-copy" id="walletForm" autocomplete="off">
+      <svg class="ic"><use href="#i-search"/></svg>
+      <input id="walletInput" type="text" inputmode="text" spellcheck="false" placeholder="Paste a wallet address" aria-label="Wallet address" />
+      <button class="pill pill-soft" type="submit"><span>Check<span class="hide-sm"> progress</span></span></button>
+      <span class="cursor" aria-hidden="true"><svg viewBox="0 0 20 20"><path d="M3 2l13 6-5.5 2L8.5 16 3 2z"/></svg><b>Paste your wallet</b></span>
+    </form>
+    <div class="scan" id="scan" hidden aria-live="polite"></div>
+    <span class="net-chip fade fade-copy"><svg class="ic xs"><use href="#i-network"/></svg>Practising on <b>BOT Chain Testnet</b></span>
+    <p class="search-note" id="walletResult" role="status">Free on testnet · no signup</p>
+    <div class="hero-cta fade fade-copy"><a class="pill pill-dark big" href="/lesson/1">Start lesson 1</a></div>
+    <p class="trust fade fade-copy" id="heroTrust" hidden><svg class="ic sm"><use href="#i-cap"/></svg><span></span></p>
+  </div>
+  </div>
+
+  <div class="jcard fade fade-wheel" id="jcard" role="img" aria-label="Animated preview of your progress through the five lessons">
+    <div class="stage-bar" aria-hidden="true"><i></i><i></i><i></i><span>First Block · /learn</span></div>
+    <div class="jc-body">
+      <div class="jc-head"><div><p class="jc-title">Your path</p><p class="jc-sub">Five blocks on testnet, then graduate on mainnet.</p></div><span class="jc-count" id="jcNum">0 of 5</span></div>
+      <ol class="jc-chain" id="jcChain"><li class="jn" data-n="0"><span class="jn-dot">1</span><span class="jn-t">Get set up</span></li><li class="jn" data-n="1"><span class="jn-dot">2</span><span class="jn-t">First transaction</span></li><li class="jn" data-n="2"><span class="jn-dot">3</span><span class="jn-t">Talk to a contract</span></li><li class="jn" data-n="3"><span class="jn-dot">4</span><span class="jn-t">Deploy</span></li><li class="jn" data-n="4"><span class="jn-dot">5</span><span class="jn-t">Make it work</span></li><li class="jn gold" data-n="5"><span class="jn-dot"><svg class="ic sm"><use href="#i-cap"/></svg></span><span class="jn-t">Graduate</span></li></ol>
+      <div class="jc-foot"><p class="jc-line" id="jcLine">Each block unlocks the next.</p><span class="xp-pill jc-xp" id="jcXp">+150 XP</span></div>
     </div>
   </div>
+  <p class="caption">A preview of your path. Once you connect, your real progress is read from the chain.</p>
 </section>
 
 <!-- 2 · The problem -->
