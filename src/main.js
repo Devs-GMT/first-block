@@ -184,7 +184,7 @@ $$('.tile').forEach((t) => { io.observe(t); t.addEventListener('click', () => t.
 
 /* ---------- FAQ ---------- */
 const FAQ = [
-  ['Is it free?', 'The lessons have no fee of their own, but every step is a real transaction on BOT Chain mainnet, so you pay a tiny gas fee in BOT. The whole course, graduation included, takes about 0.01 BOT. To practise with free coins first, BOT Chain Testnet has a faucet.'],
+  ['Is it free?', 'The lessons have no fee of their own, but every step is a real transaction on BOT Chain mainnet, so you pay a tiny gas fee in BOT. The whole course, graduation included, takes about 0.01 BOT.'],
   ['Do I need to know how to code?', 'No. You read a 15-line contract and deploy it from a button. You\'ll understand what each line does by the end.'],
   ['Is my wallet safe?', 'First Block never asks for a seed phrase or private key, and there are no approvals or token permissions. You only sign normal transactions. Never share your recovery phrase with anyone, including us.'],
   ['What if I get stuck?', 'Every lesson has a Stuck? button with the three most common fixes, and a link to BOTGuide for the rest.'],
@@ -197,7 +197,7 @@ $$('.q').forEach((q) => { io.observe(q); $('button', q).addEventListener('click'
 /* ---------- Helper ---------- */
 const HELP = [
   ['My wallet shows the wrong network', 'Open MetaMask, tap the network name at the top, and pick BOT Chain Mainnet (chain ID 677). If it\'s missing, press Add network in lesson 1.'],
-  ['I have no BOT for gas', 'The lessons need a little real BOT on BOT Chain Mainnet, about 0.01 BOT for the whole course. Get some, then press Check again. The testnet faucet only gives test coins, which the lessons don\'t use.'],
+  ['I have no BOT for gas', 'The lessons need a little real BOT on BOT Chain Mainnet, about 0.01 BOT for the whole course. Get some, then press Check again. Our Get BOT link shows the ways to get it.'],
   ['Transaction failed', 'Make sure you\'re on BOT Chain Mainnet and have some BOT for gas. If MetaMask says the transaction was rejected, press the button again and confirm.'],
 ];
 const hb = $('#helperBtn'), hp = $('#helperPanel'), ha = $('#helperA');

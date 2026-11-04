@@ -9,6 +9,7 @@ export const LESSON_NET = 'mainnet';
 
 export const LINKS = {
   botchain: 'https://botchain.ai',
+  getBot: 'https://botchain.ai/en/help-center/docs/getting-started/get-bot-for-gas/',
   docs: 'https://dev-docs.botchain.ai/docs/intro',
   faucet: 'https://faucet.botchain.ai/basic',
   testnetExplorer: 'https://scan.bohr.life',

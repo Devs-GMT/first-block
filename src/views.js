@@ -165,7 +165,7 @@ export function lessonView(root, n) {
       connect: ['Connect your wallet to start.', '<button class="pill pill-dark sm" data-act="connect">Connect wallet</button>'],
       chain: [`You're on ${wallet.chainId === NETWORKS.testnet.id ? 'BOT Chain Testnet' : `chain ${wallet.chainId}`}. The lessons run on BOT Chain Mainnet.`, '<button class="pill pill-dark sm" data-act="switch">Switch to Mainnet</button>'],
       locked: [`Finish lesson ${n - 1} first.`, `<a class="pill pill-dark sm" href="/lesson/${n - 1}">Go to lesson ${n - 1}</a>`],
-      gas: ['Your wallet has no BOT on mainnet, so it can\'t pay for gas.', `<a class="pill pill-soft sm" href="${LINKS.botchain}" target="_blank" rel="noopener">Get BOT</a><button class="pill pill-dark sm" data-act="refresh">Check again</button>`],
+      gas: ['Your wallet has no BOT on mainnet, so it can\'t pay for gas.', `<a class="pill pill-soft sm" href="${LINKS.getBot}" target="_blank" rel="noopener">Get BOT</a><button class="pill pill-dark sm" data-act="refresh">Check again</button>`],
     }[b.k];
     if (n === 1 && ['chain', 'gas'].includes(b.k)) return '';
     return `<div class="banner" role="status"><span>${m[0]}</span><span class="b-btns">${m[1]}</span></div>`;
@@ -303,7 +303,7 @@ export function lessonView(root, n) {
     if (n === 1) {
       S.push(`<li class="${hasWallet() ? 'ok' : ''}"><b>Install MetaMask</b><span class="muted">It's the wallet app that holds your address and signs for you. <a class="link-under" href="https://metamask.io/download/" target="_blank" rel="noopener">Install MetaMask</a>. Already have it? Skip ahead.</span></li>`);
       S.push(`<li class="${wallet.chainId === NETWORKS[LESSON_NET].id ? 'ok' : ''}"><b>Add BOT Chain Mainnet</b><span class="muted">One click adds the network (chain ID ${NETWORKS[LESSON_NET].id}). The lessons run here, so each step costs a tiny gas fee in real BOT.</span><span class="row-a"><button class="pill pill-dark sm" data-act="add-net"${hasWallet() ? '' : ' disabled'}>${wallet.chainId === NETWORKS[LESSON_NET].id ? 'Network added' : 'Add network'}</button></span>${stat('net')}</li>`);
-      S.push(`<li class="${st.bal > 0n ? 'ok' : ''}"><b>Get a little BOT for gas</b><span class="muted">The whole course needs about 0.01 BOT in gas.${st.addr ? ` Your balance: <b>${st.bal != null ? fmtBal(st.bal) : '…'}</b>.` : ''} Want to practise with free coins first? BOT Chain Testnet has a <a class="link-under" href="${LINKS.faucet}" target="_blank" rel="noopener">faucet</a>.</span><span class="row-a"><a class="pill pill-soft sm" href="${LINKS.botchain}" target="_blank" rel="noopener">Get BOT</a><button class="pill pill-soft sm" data-act="refresh">Check again</button></span></li>`);
+      S.push(`<li class="${st.bal > 0n ? 'ok' : ''}"><b>Get a little BOT for gas</b><span class="muted">The whole course needs about 0.01 BOT in gas.${st.addr ? ` Your balance: <b>${st.bal != null ? fmtBal(st.bal) : '…'}</b>.` : ''}</span><span class="row-a"><a class="pill pill-soft sm" href="${LINKS.getBot}" target="_blank" rel="noopener">Get BOT</a><button class="pill pill-soft sm" data-act="refresh">Check again</button></span></li>`);
       S.push(`<li class="${done() ? 'ok' : ''}"><b>Check in</b><span class="muted">The contract will look at your balance. If you have BOT to pay for gas, you're set up.</span>${preview('checkin')}<span class="row-a"><button class="pill pill-dark big" data-act="tx-checkin"${dis()}>${done() ? 'Check in again' : 'Check in'}</button></span>${stat('tx')}</li>`);
     }
     if (n === 2) {

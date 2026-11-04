@@ -24,7 +24,7 @@
     ],
     "hints": [
       "Wrong network? Open MetaMask, tap the network name at the top, and pick BOT Chain Mainnet (chain ID 677). Or press Add network below.",
-      "No BOT for gas? The lessons use real BOT on mainnet, about 0.01 BOT for the whole course. Get a little, then press Check again.",
+      "No BOT for gas? The lessons use real BOT on mainnet, about 0.01 BOT for the whole course. Use the Get BOT link, then press Check again.",
       "Nothing happens when you press a button? Look for the MetaMask pop-up, it may be hidden behind your browser window."
     ],
     "happened": "checkIn() asked the contract to look at your wallet balance. Because you had BOT to pay for gas, the balance was above zero, so the contract marked lesson 1 as done. The contract read the chain, not your word.",

@@ -110,7 +110,7 @@ App screens come from a local simulated BOT Chain mainnet (chain ID 677) running
 
 ## How it works
 
-1. Connect MetaMask. There is no sign-up and no database. Lessons run on BOT Chain mainnet and need a little real BOT for gas, about 0.01 BOT for the whole course. BOT Chain Testnet, with its [faucet](https://faucet.botchain.ai/basic), is the free place to practise first.
+1. Connect MetaMask. There is no sign-up and no database. Lessons run on BOT Chain mainnet and need a little real BOT for gas, about 0.01 BOT for the whole course.
 2. Each lesson teaches first: three short ideas, with live read-only data from the chain.
 3. You do the action from your own wallet, with a summary of what you are about to sign.
 4. The First Block contract checks the result and records the lesson. If it isn't met, the transaction reverts, and the page explains why in plain words.

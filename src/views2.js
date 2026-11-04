@@ -78,7 +78,7 @@ export function graduateView(root) {
     } else {
       const noBot = mbal === 0n;
       const kv = (k, v) => `<div class="kv"><dt>${k}</dt><dd>${v}</dd></div>`;
-      body = `${noBot ? `<div class="banner"><span>Your wallet has no BOT on mainnet, so it can't pay for the gas. Graduating is the only step in First Block that uses real BOT.</span><span class="b-btns"><a class="pill pill-soft sm" href="${LINKS.botchain}" target="_blank" rel="noopener">Get BOT</a><button class="pill pill-dark sm" data-act="recheck">Check again</button></span></div>` : ''}
+      body = `${noBot ? `<div class="banner"><span>Your wallet has no BOT on mainnet, so it can't pay for the gas. Graduating is the only step in First Block that uses real BOT.</span><span class="b-btns"><a class="pill pill-soft sm" href="${LINKS.getBot}" target="_blank" rel="noopener">Get BOT</a><button class="pill pill-dark sm" data-act="recheck">Check again</button></span></div>` : ''}
         <div class="grad-form"><p class="m-h">Note (optional)</p><input class="v-input wide" id="gradNote" maxlength="80" value="${esc(note)}" placeholder="Next I'm building a poll app!" autocomplete="off" />
         <p class="muted sm">Up to 80 characters. It is public and can't be edited later.</p>
         <div class="sign"><p class="sign-h">${icon('pen', 'xs')}You're about to sign</p><dl>
